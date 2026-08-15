@@ -1,0 +1,4 @@
+event_id,flight_number,airline,route,scheduled_departure,status,delay_reason,severity,impact,rebooking_action
+DISR_001,6E-204,IndiGo,DEL -> GOI,2026-09-10 08:30,Delayed by 3h 45m,Heavy Monsoons / Low Visibility in Goa,High,Misses 11:30 AM airport pickup and South Goa Day 1 tour,Auto-reschedule hotel check-in time to 1:30 PM; Shift Fort Aguada visit to Day 2 morning.
+DISR_002,UK-811,Vistara,BOM -> JAI,2026-09-12 14:15,Cancelled,Technical Aircraft Glitch,Critical,Stranded at Mumbai Airport for scheduled Jaipur trip,"Auto-recommend alternative Air India flight AI-612 at 16:30 (INR 4,200) or IndiGo 6E-455 at 17:15."
+DISR_003,AI-505,Air India,BLR -> COK,2026-09-15 10:00,Gate Change & 45m Delay,Inbound aircraft late arrival,Low,"Minor 45m delay, no itinerary clash",Send instant notification to user with updated Gate 14B and estimated arrival at 11:45 AM.

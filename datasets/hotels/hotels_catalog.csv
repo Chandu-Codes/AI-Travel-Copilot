@@ -1,0 +1,11 @@
+hotel_id,name,city,tier,price_per_night_inr,star_rating,review_score,total_reviews,amenities,lat,lon
+HTL_GOA_01,Taj Fort Aguada Resort & Spa,Goa,Luxury,18500,5.0,4.8,3240,"Beachfront, Infinity Pool, Ayurvedic Spa, Free Breakfast, Ocean View, Kids Club",15.494,73.7745
+HTL_GOA_02,BloomSuites Calangute,Goa,Mid-Range,4200,4.0,4.3,1820,"Swimming Pool, Wi-Fi, Restaurant, Bar, AC, 500m to Beach, Parking",15.541,73.762
+HTL_GOA_03,Zostel Goa Morjim,Goa,Budget / Hostel,1100,3.5,4.6,2450,"Dorms & Private Rooms, High-speed Wi-Fi, Co-working, Rooftop Cafe, Social Events",15.611,73.738
+HTL_GOA_04,Hard Rock Hotel Goa (Calangute),Goa,Premium,8500,4.5,4.5,1600,"Poolside Bar, Live Music, Rock Spa, Gym, Gourmet Dining",15.539,73.771
+HTL_JPR_01,Rambagh Palace (Taj Heritage),Jaipur,Luxury,38000,5.0,4.9,4100,"Heritage Royal Palace, Peacock Lawns, Butler Service, Fine Dining, Jiva Spa",26.8979,75.808
+HTL_JPR_02,Umaid Bhawan Heritage House Hotel,Jaipur,Mid-Range,3600,4.0,4.4,1950,"Rajput Architecture, Swimming Pool, Rooftop Restaurant, Antique Furnishings",26.932,75.795
+HTL_JPR_03,Moustache Hostel Jaipur,Jaipur,Budget / Hostel,850,3.5,4.5,3100,"Air-Conditioned Dorms, Rooftop Pool & Lounge, Free City Walking Tours",26.918,75.799
+HTL_KER_01,Kumarakom Lake Resort,Alleppey,Luxury,23000,5.0,4.8,2890,"Meandering Pool, Ayurvedic Treatment, Traditional Heritage Villas, Houseboat Docks",9.6178,76.4282
+HTL_KER_02,Grand Hyatt Kochi Bolgatty,Kochi,Luxury,12000,5.0,4.7,2300,"Waterfront, Marina View, Helipad, Luxury Spa, Multiple Cuisines",9.988,76.267
+HTL_KER_03,Tea Valley Resort Munnar,Munnar,Mid-Range,3800,4.0,4.2,1400,"Tea Plantation Balcony, Campfire, Restaurant, Mountain Trekking Guide",10.052,77.062
