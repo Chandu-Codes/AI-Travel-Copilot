@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
@@ -22,20 +23,58 @@ export const App: React.FC = () => {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* Public Landing Page */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/plan-trip" element={<TripPlannerPage />} />
-          <Route path="/assistant" element={<AIAssistantPage />} />
-          <Route path="/itinerary/:id" element={<ItineraryPage />} />
-          <Route path="/explore" element={<ExplorePage />} />
-          <Route path="/hotels" element={<HotelsPage />} />
-          <Route path="/flights" element={<FlightsPage />} />
-          <Route path="/budget" element={<BudgetPage />} />
-          <Route path="/disruptions" element={<DisruptionsPage />} />
-          <Route path="/weather" element={<WeatherPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
+
+          {/* Protected Routes (Require Sign In / Account) */}
+          <Route 
+            path="/dashboard" 
+            element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/plan-trip" 
+            element={<ProtectedRoute><TripPlannerPage /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/assistant" 
+            element={<ProtectedRoute><AIAssistantPage /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/itinerary/:id" 
+            element={<ProtectedRoute><ItineraryPage /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/explore" 
+            element={<ProtectedRoute><ExplorePage /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/hotels" 
+            element={<ProtectedRoute><HotelsPage /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/flights" 
+            element={<ProtectedRoute><FlightsPage /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/budget" 
+            element={<ProtectedRoute><BudgetPage /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/disruptions" 
+            element={<ProtectedRoute><DisruptionsPage /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/weather" 
+            element={<ProtectedRoute><WeatherPage /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/profile" 
+            element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} 
+          />
+
+          {/* Fallback to Landing Page */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

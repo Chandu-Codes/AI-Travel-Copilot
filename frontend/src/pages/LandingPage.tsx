@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plane, Compass, Sparkles, Users, Award, Headphones, Star, ArrowRight } from 'lucide-react';
+import { Search, Plane, Compass, Sparkles, Users, Award, Headphones, Star, ArrowRight, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const LandingPage: React.FC = () => {
@@ -10,7 +10,19 @@ export const LandingPage: React.FC = () => {
 
   const handlePlanClick = (destinationName?: string) => {
     const dest = destinationName || searchQuery || 'Goa';
-    navigate(`/plan-trip?dest=${encodeURIComponent(dest)}`);
+    if (!isAuthenticated) {
+      navigate(`/login?redirect=${encodeURIComponent(`/plan-trip?dest=${encodeURIComponent(dest)}`)}`);
+    } else {
+      navigate(`/plan-trip?dest=${encodeURIComponent(dest)}`);
+    }
+  };
+
+  const handleNavClick = (path: string) => {
+    if (!isAuthenticated) {
+      navigate(`/login?redirect=${encodeURIComponent(path)}`);
+    } else {
+      navigate(path);
+    }
   };
 
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
@@ -33,12 +45,12 @@ export const LandingPage: React.FC = () => {
         </div>
 
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-          <button onClick={() => navigate('/dashboard')} className="hover:text-blue-600 transition">Home</button>
-          <button onClick={() => navigate('/plan-trip')} className="hover:text-blue-600 transition">Plan Trip</button>
-          <button onClick={() => navigate('/explore')} className="hover:text-blue-600 transition">Destinations</button>
-          <button onClick={() => navigate('/itinerary/1')} className="hover:text-blue-600 transition">Itinerary</button>
-          <button onClick={() => navigate('/hotels')} className="hover:text-blue-600 transition">Bookings</button>
-          <button onClick={() => navigate('/assistant')} className="hover:text-blue-600 transition">AI Assistant</button>
+          <button onClick={() => handleNavClick('/dashboard')} className="hover:text-blue-600 transition">Home</button>
+          <button onClick={() => handleNavClick('/plan-trip')} className="hover:text-blue-600 transition">Plan Trip</button>
+          <button onClick={() => handleNavClick('/explore')} className="hover:text-blue-600 transition">Destinations</button>
+          <button onClick={() => handleNavClick('/itinerary/1')} className="hover:text-blue-600 transition">Itinerary</button>
+          <button onClick={() => handleNavClick('/hotels')} className="hover:text-blue-600 transition">Bookings</button>
+          <button onClick={() => handleNavClick('/assistant')} className="hover:text-blue-600 transition">AI Assistant</button>
         </nav>
 
         <div>
@@ -227,9 +239,9 @@ export const LandingPage: React.FC = () => {
       <footer className="max-w-7xl mx-auto w-full px-6 py-6 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-500">
         <p>© 2026 AI Travel Copilot Inc. All rights reserved.</p>
         <div className="flex items-center gap-6">
-          <button onClick={() => navigate('/dashboard')} className="hover:text-blue-600 font-medium">Dashboard</button>
-          <button onClick={() => navigate('/assistant')} className="hover:text-blue-600 font-medium">AI Chatbot</button>
-          <button onClick={() => navigate('/flights')} className="hover:text-blue-600 font-medium">Flight Fares</button>
+          <button onClick={() => handleNavClick('/dashboard')} className="hover:text-blue-600 font-medium">Dashboard</button>
+          <button onClick={() => handleNavClick('/assistant')} className="hover:text-blue-600 font-medium">AI Chatbot</button>
+          <button onClick={() => handleNavClick('/flights')} className="hover:text-blue-600 font-medium">Flight Fares</button>
         </div>
       </footer>
     </div>

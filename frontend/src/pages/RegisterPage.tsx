@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Plane, Mail, Lock, User as UserIcon, Eye, EyeOff, Sparkles, ArrowRight, AlertCircle, Compass, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { register } = useAuth();
+
+  const redirectUrl = searchParams.get('redirect') || '/dashboard';
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -40,7 +43,7 @@ export const RegisterPage: React.FC = () => {
 
     try {
       await register(name.trim(), email.trim(), password, travelStyle);
-      navigate('/dashboard');
+      navigate(redirectUrl);
     } catch (err: any) {
       console.error("Registration error:", err);
       if (err.code === "ERR_NETWORK" || !err.response) {
@@ -73,7 +76,7 @@ export const RegisterPage: React.FC = () => {
 
         <div className="text-xs font-medium text-slate-500">
           Already have an account?{' '}
-          <Link to="/login" className="text-blue-600 font-bold hover:underline">
+          <Link to={`/login${searchParams.toString() ? `?${searchParams.toString()}` : ''}`} className="text-blue-600 font-bold hover:underline">
             Sign In
           </Link>
         </div>
@@ -104,7 +107,7 @@ export const RegisterPage: React.FC = () => {
               {isExistingAccount && (
                 <button
                   type="button"
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate(`/login${searchParams.toString() ? `?${searchParams.toString()}` : ''}`)}
                   className="w-full mt-2 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition flex items-center justify-center gap-1.5"
                 >
                   <LogIn className="w-3.5 h-3.5" />
@@ -238,7 +241,7 @@ export const RegisterPage: React.FC = () => {
           {/* Footer Link */}
           <div className="text-center pt-2 text-xs text-slate-500 font-medium">
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 font-bold hover:underline">
+            <Link to={`/login${searchParams.toString() ? `?${searchParams.toString()}` : ''}`} className="text-blue-600 font-bold hover:underline">
               Sign in
             </Link>
           </div>

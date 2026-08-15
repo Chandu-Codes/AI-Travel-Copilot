@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Plane, Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { Plane, Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, AlertCircle, CheckCircle2, Compass } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
+
+  const redirectUrl = searchParams.get('redirect') || '/dashboard';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +29,7 @@ export const LoginPage: React.FC = () => {
 
     try {
       await login(email.trim(), password);
-      navigate('/dashboard');
+      navigate(redirectUrl);
     } catch (err: any) {
       console.error("Login error:", err);
       const detail = err.response?.data?.detail || "Invalid email or password. Please check your credentials.";
@@ -44,7 +47,7 @@ export const LoginPage: React.FC = () => {
 
     try {
       await login('chandu@example.com', 'demo123');
-      navigate('/dashboard');
+      navigate(redirectUrl);
     } catch (err: any) {
       setError("Demo login failed. Please try again.");
     } finally {
@@ -68,7 +71,7 @@ export const LoginPage: React.FC = () => {
 
         <div className="text-xs font-medium text-slate-500">
           New to Copilot?{' '}
-          <Link to="/register" className="text-blue-600 font-bold hover:underline">
+          <Link to={`/register${searchParams.toString() ? `?${searchParams.toString()}` : ''}`} className="text-blue-600 font-bold hover:underline">
             Create an account
           </Link>
         </div>
@@ -82,9 +85,9 @@ export const LoginPage: React.FC = () => {
               <Sparkles className="w-3.5 h-3.5 text-blue-600" />
               <span>Secure Authentication</span>
             </div>
-            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Welcome Back</h2>
+            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Sign In to Continue</h2>
             <p className="text-xs text-slate-500 font-medium">
-              Sign in to manage your AI itineraries, bookings, and budget.
+              Please sign in or create an account to start planning your vacation with AI Copilot.
             </p>
           </div>
 
@@ -176,7 +179,7 @@ export const LoginPage: React.FC = () => {
                 <span>Signing In...</span>
               ) : (
                 <>
-                  <span>Sign In</span>
+                  <span>Sign In & Continue</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -204,7 +207,7 @@ export const LoginPage: React.FC = () => {
           {/* Footer Link */}
           <div className="text-center pt-2 text-xs text-slate-500 font-medium">
             Don't have an account?{' '}
-            <Link to="/register" className="text-blue-600 font-bold hover:underline">
+            <Link to={`/register${searchParams.toString() ? `?${searchParams.toString()}` : ''}`} className="text-blue-600 font-bold hover:underline">
               Sign up for free
             </Link>
           </div>
