@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   ArrowLeft, 
   Share2, 
@@ -14,159 +14,94 @@ import {
   Sparkles,
   ChevronRight,
   Star,
-  CheckCircle2
+  CheckCircle2,
+  AlertTriangle,
+  CloudSun,
+  ShieldCheck,
+  ExternalLink
 } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { Navbar } from '../components/Navbar';
 import { MapComponent } from '../components/MapComponent';
 import { travelApi } from '../services/api';
-import { Trip } from '../types';
+import { Trip, Hotel, FlightItem } from '../types';
 
 export const ItineraryPage: React.FC = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'day_plan' | 'stay' | 'transport' | 'budget' | 'map'>('day_plan');
   const [trip, setTrip] = useState<Trip | null>(null);
+  const [hotels, setHotels] = useState<Hotel[]>([]);
+  const [flights, setFlights] = useState<FlightItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     travelApi.getTripById(id || 1)
-      .then(res => setTrip(res.data))
+      .then(res => {
+        setTrip(res.data);
+        if (res.data?.destination) {
+          localStorage.setItem('travel_copilot_active_destination', res.data.destination);
+          // Load hotels & flights for this destination
+          travelApi.getHotels({ city: res.data.destination }).then(h => setHotels(h.data)).catch(() => {});
+          travelApi.searchFlights("Delhi", res.data.destination).then(f => setFlights(f.data.flights)).catch(() => {});
+        }
+      })
       .catch(() => {
-        // Provide pristine fallback Swiss Adventure trip matching the reference screenshot exactly!
-        setTrip({
+        const dest = searchParams.get('dest') || localStorage.getItem('travel_copilot_active_destination') || "Goa";
+        const fallbackTrip: Trip = {
           id: 1,
-          title: "Swiss Adventure",
-          destination: "Switzerland",
-          country: "Europe",
+          title: `${dest} Vacation Experience`,
+          destination: dest,
+          country: "India / Global",
           start_date: "10 June 2025",
           end_date: "15 June 2025",
           duration_days: 5,
           travelers_count: 2,
           travelers_label: "2 Adults",
-          total_budget_inr: 180000,
-          estimated_cost_inr: 172000,
+          total_budget_inr: 45000,
+          estimated_cost_inr: 41500,
           travel_style: "Balanced",
-          interests: ["Sightseeing", "Alps", "Lakes", "Scenic Trains"],
-          image_url: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1600&q=85",
+          interests: ["Sightseeing", "Food", "Scenic", "Heritage"],
+          image_url: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=1600&q=85",
           status: "upcoming",
           itinerary_days: [
             {
               id: 101,
               day_number: 1,
-              title: "Arrival in Zurich",
-              theme: "Lakeside & Old Town",
-              description: "Arrive in Zurich, explore the city and relax by the lake.",
+              title: `${dest} Arrival & Old Town Tour`,
+              theme: "Heritage & Culture",
+              description: `Arrive in ${dest} and discover historic landmarks and scenic lookouts.`,
               date_str: "10 June 2025",
               activities: [
                 {
                   id: 1,
                   day_id: 101,
                   order_index: 0,
-                  time_slot: "Morning (10:00 AM)",
-                  name: "Zurich Old Town (Altstadt) Walking Tour",
-                  description: "Stroll along historic cobblestone streets, Lindenhof hill viewpoint, and Fraumünster Church.",
+                  time_slot: "Morning (09:30 AM)",
+                  name: `${dest} Central Landmark & Historic Walk`,
+                  description: `Stroll through iconic monuments and cultural squares of ${dest}.`,
                   category: "Heritage",
                   cost_inr: 0,
                   duration_hrs: 2.5,
                   rating: 4.8,
-                  lat: 47.3717,
-                  lon: 8.5422,
-                  image_url: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&q=80",
-                  location_name: "Altstadt, Zurich"
-                },
-                {
-                  id: 2,
-                  day_id: 101,
-                  order_index: 1,
-                  time_slot: "Evening (05:00 PM)",
-                  name: "Lake Zurich Sunset Promenade & Cruise",
-                  description: "Relax by Bürkliplatz promenade and enjoy a scenic evening boat ride.",
-                  category: "Scenic",
-                  cost_inr: 1200,
-                  duration_hrs: 2.0,
-                  rating: 4.9,
-                  lat: 47.3667,
-                  lon: 8.5417,
-                  image_url: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&q=80",
-                  location_name: "Lake Zurich"
-                }
-              ]
-            },
-            {
-              id: 102,
-              day_number: 2,
-              title: "Lucerne City Tour",
-              theme: "Historic Bridges & Mount Pilatus",
-              description: "Visit Chapel Bridge, Lion Monument and Mt. Pilatus.",
-              date_str: "11 June 2025",
-              activities: [
-                {
-                  id: 3,
-                  day_id: 102,
-                  order_index: 0,
-                  time_slot: "Morning (09:00 AM)",
-                  name: "Chapel Bridge (Kapellbrücke) & Water Tower",
-                  description: "World famous 14th-century covered wooden footbridge spanning the Reuss River.",
-                  category: "Heritage",
-                  cost_inr: 0,
-                  duration_hrs: 1.5,
-                  rating: 4.7,
-                  lat: 47.0516,
-                  lon: 8.3075,
-                  image_url: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&q=80",
-                  location_name: "Lucerne"
-                },
-                {
-                  id: 4,
-                  day_id: 102,
-                  order_index: 1,
-                  time_slot: "Afternoon (01:30 PM)",
-                  name: "Mount Pilatus Golden Roundtrip Cableway",
-                  description: "Ride the world's steepest cogwheel railway to the summit for alpine views.",
-                  category: "Adventure",
-                  cost_inr: 3500,
-                  duration_hrs: 4.0,
-                  rating: 4.9,
-                  lat: 46.9792,
-                  lon: 8.2536,
-                  image_url: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&q=80",
-                  location_name: "Mount Pilatus"
-                }
-              ]
-            },
-            {
-              id: 103,
-              day_number: 3,
-              title: "Interlaken Adventure",
-              theme: "Top of Europe Excursion",
-              description: "Explore Jungfraujoch - Top of Europe.",
-              date_str: "12 June 2025",
-              activities: [
-                {
-                  id: 5,
-                  day_id: 103,
-                  order_index: 0,
-                  time_slot: "Full Day (09:00 AM)",
-                  name: "Jungfraujoch Sphinx Observatory & Ice Palace",
-                  description: "High alpine railway taking you to 3,454m elevation with view of Aletsch Glacier.",
-                  category: "Wonder",
-                  cost_inr: 6500,
-                  duration_hrs: 6.0,
-                  rating: 5.0,
-                  lat: 46.5475,
-                  lon: 7.9825,
-                  image_url: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&q=80",
-                  location_name: "Jungfraujoch"
+                  lat: 15.4989,
+                  lon: 73.8278,
+                  image_url: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80",
+                  location_name: dest
                 }
               ]
             }
           ]
-        });
+        };
+        setTrip(fallbackTrip);
+        localStorage.setItem('travel_copilot_active_destination', dest);
+        travelApi.getHotels({ city: dest }).then(h => setHotels(h.data)).catch(() => {});
+        travelApi.searchFlights("Delhi", dest).then(f => setFlights(f.data.flights)).catch(() => {});
       })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, searchParams]);
 
   const handleDownload = () => {
     if (!trip) return;
@@ -197,8 +132,8 @@ export const ItineraryPage: React.FC = () => {
 
   const markers = trip.itinerary_days.flatMap(d => d.activities.map(a => ({
     name: a.name,
-    lat: a.lat || 47.3769,
-    lon: a.lon || 8.5417,
+    lat: a.lat || 15.4989,
+    lon: a.lon || 73.8278,
     description: a.description,
     category: a.category
   })));
@@ -210,7 +145,7 @@ export const ItineraryPage: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar 
           title="Your Itinerary" 
-          subtitle={`${trip.title} • ${trip.duration_days} Days / ${trip.duration_days - 1} Nights`} 
+          subtitle={`${trip.title} • ${trip.duration_days} Days / ${trip.duration_days - 1} Nights in ${trip.destination}`} 
         />
 
         <main className="p-8 max-w-7xl w-full space-y-6">
@@ -221,7 +156,7 @@ export const ItineraryPage: React.FC = () => {
               className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-blue-600 transition"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Your Itinerary</span>
+              <span>Back to Dashboard</span>
             </button>
 
             <div className="flex items-center gap-3">
@@ -243,7 +178,7 @@ export const ItineraryPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Hero Banner (Matching Reference UI: Swiss Adventure, 5 Days / 4 Nights • 10 - 15 June 2025) */}
+          {/* Hero Banner */}
           <div className="relative rounded-3xl overflow-hidden aspect-[24/8] w-full shadow-lg border border-slate-200/80">
             <img
               src={trip.image_url}
@@ -253,6 +188,9 @@ export const ItineraryPage: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/25 to-transparent" />
 
             <div className="absolute bottom-6 left-8 text-white space-y-1">
+              <span className="px-3 py-1 rounded-full bg-blue-600/90 text-white font-bold text-[11px] uppercase tracking-wider">
+                {trip.destination}
+              </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight drop-shadow-md">
                 {trip.title}
               </h2>
@@ -262,15 +200,62 @@ export const ItineraryPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Tabs Navigation (Matching Reference UI: Overview, Day Plan, Stay, Transport, Budget, Map) */}
+          {/* Quick-Action Integrated Cards (Hotels, Flights, Disruptions, Weather for this specific trip) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+            <button
+              onClick={() => navigate(`/hotels?city=${encodeURIComponent(trip.destination)}`)}
+              className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md transition text-left space-y-1.5 group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition">
+                <Building2 className="w-4 h-4" />
+              </div>
+              <p className="text-xs font-bold text-slate-900 leading-tight">Hotels in {trip.destination}</p>
+              <p className="text-[11px] text-slate-400">View verified stays &rarr;</p>
+            </button>
+
+            <button
+              onClick={() => navigate(`/flights?destination=${encodeURIComponent(trip.destination)}`)}
+              className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md transition text-left space-y-1.5 group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition">
+                <Plane className="w-4 h-4" />
+              </div>
+              <p className="text-xs font-bold text-slate-900 leading-tight">Flights to {trip.destination}</p>
+              <p className="text-[11px] text-slate-400">Check fares & delays &rarr;</p>
+            </button>
+
+            <button
+              onClick={() => navigate(`/disruptions?destination=${encodeURIComponent(trip.destination)}`)}
+              className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-amber-500 hover:shadow-md transition text-left space-y-1.5 group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition">
+                <AlertTriangle className="w-4 h-4" />
+              </div>
+              <p className="text-xs font-bold text-slate-900 leading-tight">Disruption Radar</p>
+              <p className="text-[11px] text-slate-400">Transit & road status &rarr;</p>
+            </button>
+
+            <button
+              onClick={() => navigate(`/weather?destination=${encodeURIComponent(trip.destination)}`)}
+              className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-indigo-500 hover:shadow-md transition text-left space-y-1.5 group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition">
+                <CloudSun className="w-4 h-4" />
+              </div>
+              <p className="text-xs font-bold text-slate-900 leading-tight">Weather Forecast</p>
+              <p className="text-[11px] text-slate-400">Packing & climate tips &rarr;</p>
+            </button>
+          </div>
+
+          {/* Tabs Navigation */}
           <div className="flex items-center gap-2 border-b border-slate-200 pb-2 text-xs font-bold overflow-x-auto">
             {[
               { key: 'overview', label: 'Overview' },
               { key: 'day_plan', label: 'Day Plan' },
-              { key: 'stay', label: 'Stay' },
-              { key: 'transport', label: 'Transport' },
-              { key: 'budget', label: 'Budget' },
-              { key: 'map', label: 'Map' }
+              { key: 'stay', label: `Hotels (${hotels.length})` },
+              { key: 'transport', label: `Flights (${flights.length})` },
+              { key: 'budget', label: 'Budget Allocation' },
+              { key: 'map', label: 'Map Route' }
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -286,11 +271,11 @@ export const ItineraryPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Tab Content & Trip Details Grid */}
+          {/* Tab Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Left Main Content */}
             <div className="lg:col-span-8 space-y-6">
-              {/* TAB: Day Plan (Default Matching Reference UI) */}
+              {/* TAB: Day Plan */}
               {activeTab === 'day_plan' && (
                 <div className="space-y-6">
                   {trip.itinerary_days.map((day) => (
@@ -361,7 +346,7 @@ export const ItineraryPage: React.FC = () => {
                 <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4 text-sm text-slate-700">
                   <h3 className="font-bold text-slate-900 text-base">Trip Overview & Highlights</h3>
                   <p className="leading-relaxed">
-                    This {trip.duration_days}-day customized journey to <strong>{trip.destination}</strong> has been engineered with AI TSP routing and 0/1 Knapsack financial optimization. It maximizes your time enjoying iconic landmarks, alpine vistas, cultural hotspots, and local cuisine while preserving budget elasticity.
+                    This {trip.duration_days}-day journey to <strong>{trip.destination}</strong> has been engineered with TSP routing and 0/1 Knapsack financial optimization. It maximizes landmark exploration while minimizing transit fatigue.
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
                     <div className="p-3 rounded-2xl bg-blue-50 border border-blue-100">
@@ -380,22 +365,79 @@ export const ItineraryPage: React.FC = () => {
                 </div>
               )}
 
-              {/* TAB: Stay / Accommodations */}
+              {/* TAB: Stay / Hotels in Destination */}
               {activeTab === 'stay' && (
-                <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
-                  <h3 className="font-bold text-slate-900 text-base">Recommended Hotel Stay</h3>
-                  <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row gap-4 items-center">
-                    <img 
-                      src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80" 
-                      alt="Hotel" 
-                      className="w-full sm:w-40 aspect-[4/3] rounded-xl object-cover" 
-                    />
-                    <div className="space-y-1.5 flex-1">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">4-Star Comfort</span>
-                      <h4 className="font-bold text-slate-900 text-base">Swiss Grand Lakeside Resort</h4>
-                      <p className="text-xs text-slate-500">Lake view balcony, complimentary breakfast, near central train station.</p>
-                      <p className="text-sm font-extrabold text-blue-600 pt-1">₹14,500 / night (4 Nights reserved)</p>
-                    </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-slate-900 text-base">Verified Stays in {trip.destination}</h3>
+                    <button 
+                      onClick={() => navigate(`/hotels?city=${encodeURIComponent(trip.destination)}`)}
+                      className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      <span>Explore all hotels</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {hotels.slice(0, 3).map((h) => (
+                      <div key={h.hotel_id} className="p-4 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row gap-4 items-center shadow-xs">
+                        <img 
+                          src={h.image_url} 
+                          alt={h.name} 
+                          className="w-full sm:w-40 aspect-[4/3] rounded-xl object-cover" 
+                        />
+                        <div className="space-y-1.5 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">{h.tier}</span>
+                            <span className="text-xs font-bold text-amber-600 flex items-center gap-0.5">
+                              <Star className="w-3 h-3 fill-amber-400" />
+                              {h.star_rating}
+                            </span>
+                          </div>
+                          <h4 className="font-bold text-slate-900 text-sm">{h.name}</h4>
+                          <p className="text-xs text-slate-500">{h.amenities}</p>
+                          <p className="text-sm font-extrabold text-blue-600 pt-1">₹{h.price_per_night_inr.toLocaleString('en-IN')} / night</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: Transport / Flights */}
+              {activeTab === 'transport' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-slate-900 text-base">Flight Fares to {trip.destination}</h3>
+                    <button 
+                      onClick={() => navigate(`/flights?destination=${encodeURIComponent(trip.destination)}`)}
+                      className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      <span>Search more flights</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {flights.slice(0, 3).map((f, i) => (
+                      <div key={i} className="p-4 rounded-2xl border border-slate-200 bg-white flex items-center justify-between shadow-xs">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                            <Plane className="w-5 h-5 -rotate-45" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900 text-sm">{f.airline}</p>
+                            <p className="text-xs text-slate-500">{f.source_city} &rarr; {f.destination_city} • {f.duration_hrs}h</p>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <p className="text-base font-black text-blue-600">₹{f.predicted_price_inr.toLocaleString('en-IN')}</p>
+                          <span className="text-[10px] text-emerald-600 font-bold">Delay Risk: {f.delay_risk}</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -403,50 +445,39 @@ export const ItineraryPage: React.FC = () => {
               {/* TAB: Budget */}
               {activeTab === 'budget' && (
                 <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
-                  <h3 className="font-bold text-slate-900 text-base">Knapsack Budget Allocation</h3>
+                  <h3 className="font-bold text-slate-900 text-base">Knapsack Budget Allocation ({trip.destination})</h3>
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between p-3 rounded-xl bg-slate-50">
-                      <span className="font-semibold text-slate-700">Hotels (4 Nights)</span>
-                      <span className="font-bold text-slate-900">₹ 58,000</span>
+                      <span className="font-semibold text-slate-700">Hotels ({trip.duration_days - 1} Nights)</span>
+                      <span className="font-bold text-slate-900">₹ {Math.round(trip.total_budget_inr * 0.38).toLocaleString('en-IN')}</span>
                     </div>
                     <div className="flex justify-between p-3 rounded-xl bg-slate-50">
-                      <span className="font-semibold text-slate-700">Roundtrip Flights + Swiss Pass</span>
-                      <span className="font-bold text-slate-900">₹ 65,000</span>
+                      <span className="font-semibold text-slate-700">Roundtrip Flights & Local Transit</span>
+                      <span className="font-bold text-slate-900">₹ {Math.round(trip.total_budget_inr * 0.32).toLocaleString('en-IN')}</span>
                     </div>
                     <div className="flex justify-between p-3 rounded-xl bg-slate-50">
-                      <span className="font-semibold text-slate-700">Activities & Mountain Cableways</span>
-                      <span className="font-bold text-slate-900">₹ 32,000</span>
+                      <span className="font-semibold text-slate-700">Activities & Entry Tickets</span>
+                      <span className="font-bold text-slate-900">₹ {Math.round(trip.total_budget_inr * 0.16).toLocaleString('en-IN')}</span>
                     </div>
                     <div className="flex justify-between p-3 rounded-xl bg-slate-50">
                       <span className="font-semibold text-slate-700">Food & Dining</span>
-                      <span className="font-bold text-slate-900">₹ 17,000</span>
+                      <span className="font-bold text-slate-900">₹ {Math.round(trip.total_budget_inr * 0.09).toLocaleString('en-IN')}</span>
                     </div>
                     <div className="flex justify-between p-3 rounded-xl bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
-                      <span>Emergency Buffer Reserve</span>
-                      <span>₹ 8,000</span>
+                      <span>Emergency Buffer Reserve (5%)</span>
+                      <span>₹ {Math.round(trip.total_budget_inr * 0.05).toLocaleString('en-IN')}</span>
                     </div>
                   </div>
                 </div>
               )}
-
-              {/* TAB: Transport */}
-              {activeTab === 'transport' && (
-                <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
-                  <h3 className="font-bold text-slate-900 text-base">Transportation Plan</h3>
-                  <p className="text-xs text-slate-600">
-                    Includes international roundtrip flights + <strong>Swiss Travel Pass</strong> granting unlimited train, bus, and boat rides across all Swiss cities.
-                  </p>
-                </div>
-              )}
             </div>
 
-            {/* Right Column: Trip Details Card (Matching Reference UI) */}
+            {/* Right Column: Trip Details Card */}
             <div className="lg:col-span-4">
               <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-5 sticky top-28">
                 <h3 className="font-bold text-slate-900 text-base">Trip Details</h3>
 
                 <div className="space-y-4 text-xs">
-                  {/* Total Budget */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5 text-slate-600">
                       <DollarSign className="w-4 h-4 text-slate-400" />
@@ -457,7 +488,6 @@ export const ItineraryPage: React.FC = () => {
                     </span>
                   </div>
 
-                  {/* Travelers */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5 text-slate-600">
                       <Users className="w-4 h-4 text-slate-400" />
@@ -466,16 +496,14 @@ export const ItineraryPage: React.FC = () => {
                     <span className="font-bold text-slate-900">{trip.travelers_label}</span>
                   </div>
 
-                  {/* Travel Mode */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5 text-slate-600">
                       <Plane className="w-4 h-4 text-slate-400" />
-                      <span className="font-medium">Travel Mode</span>
+                      <span className="font-medium">Destination</span>
                     </div>
-                    <span className="font-bold text-slate-900">Flights + Train</span>
+                    <span className="font-bold text-slate-900">{trip.destination}</span>
                   </div>
 
-                  {/* Accommodation */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5 text-slate-600">
                       <Building2 className="w-4 h-4 text-slate-400" />
@@ -484,7 +512,6 @@ export const ItineraryPage: React.FC = () => {
                     <span className="font-bold text-slate-900">{trip.duration_days - 1} Nights</span>
                   </div>
 
-                  {/* Total Days */}
                   <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                     <div className="flex items-center gap-2.5 text-slate-600">
                       <Calendar className="w-4 h-4 text-slate-400" />

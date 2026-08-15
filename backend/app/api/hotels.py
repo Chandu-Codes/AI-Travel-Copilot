@@ -8,19 +8,6 @@ router = APIRouter(prefix="/hotels", tags=["Hotels & Accommodations"])
 
 HOTELS_CSV = "datasets/hotels/hotels_catalog.csv"
 
-HOTEL_IMAGES = {
-    "Taj Fort Aguada Resort & Spa": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
-    "BloomSuites Calangute": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80",
-    "Zostel Goa Morjim": "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&q=80",
-    "Hard Rock Hotel Goa (Calangute)": "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&q=80",
-    "Rambagh Palace (Taj Heritage)": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80",
-    "Umaid Bhawan Heritage House Hotel": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&q=80",
-    "Moustache Hostel Jaipur": "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&q=80",
-    "Kumarakom Lake Resort": "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800&q=80",
-    "Grand Hyatt Kochi Bolgatty": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
-    "Tea Valley Resort Munnar": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80"
-}
-
 @router.get("")
 def get_hotels(
     city: Optional[str] = None,
@@ -33,10 +20,25 @@ def get_hotels(
         
     df = pd.read_csv(HOTELS_CSV)
     
-    if city and city != "All":
-        df = df[df['city'].str.lower() == city.lower()]
-    if tier and tier != "All":
-        df = df[df['tier'].str.lower().str.contains(tier.lower())]
+    if city and city.strip() and city.lower() != "all":
+        city_clean = city.strip().lower()
+        # Direct match or partial match on city/country/address
+        matching = df[
+            df['city'].str.lower().str.contains(city_clean) | 
+            df['country'].str.lower().str.contains(city_clean) |
+            df['address'].str.lower().str.contains(city_clean)
+        ]
+        if not matching.empty:
+            df = matching
+        else:
+            # Fallback: find if query contains city keyword
+            for c in df['city'].unique():
+                if c.lower() in city_clean or city_clean in c.lower():
+                    df = df[df['city'].str.lower() == c.lower()]
+                    break
+                    
+    if tier and tier.strip() and tier.lower() != "all":
+        df = df[df['tier'].str.lower().str.contains(tier.strip().lower())]
     if max_price:
         df = df[df['price_per_night_inr'] <= max_price]
     if min_rating:
@@ -44,7 +46,9 @@ def get_hotels(
         
     hotels = df.to_dict(orient="records")
     for h in hotels:
-        h["image_url"] = HOTEL_IMAGES.get(h["name"], "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80")
+        if not h.get("image_url") or str(h.get("image_url")) == "nan":
+            h["image_url"] = "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80"
+            
         h["sentiment_summary"] = hotel_sentiment_service.analyze_text(
             f"Wonderful stay at {h['name']}. Very clean rooms, exceptional customer service, peaceful location, and great value."
         )

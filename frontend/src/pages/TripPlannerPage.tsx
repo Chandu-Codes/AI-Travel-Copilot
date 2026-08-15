@@ -24,7 +24,7 @@ export const TripPlannerPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const [destination, setDestination] = useState(searchParams.get('dest') || 'Goa');
+  const [destination, setDestination] = useState(searchParams.get('dest') || localStorage.getItem('travel_copilot_active_destination') || 'Goa');
   const [startDate, setStartDate] = useState('2025-06-10');
   const [endDate, setEndDate] = useState('2025-06-15');
   const [travelers, setTravelers] = useState('2 Adults');
@@ -65,7 +65,7 @@ export const TripPlannerPage: React.FC = () => {
     if (dest) {
       setDestination(dest);
       const d = dest.toLowerCase();
-      if (d.includes('goa') || d.includes('jaipur') || d.includes('kerala') || d.includes('munnar')) {
+      if (d.includes('goa') || d.includes('jaipur') || d.includes('kerala') || d.includes('munnar') || d.includes('manali')) {
         setBudget(35000);
       } else if (d.includes('switzerland') || d.includes('paris') || d.includes('japan') || d.includes('london')) {
         setBudget(160000);
@@ -100,6 +100,9 @@ export const TripPlannerPage: React.FC = () => {
     setIsGenerating(true);
     setCurrentStep(0);
 
+    const targetCity = destination.split(',')[0].trim();
+    localStorage.setItem('travel_copilot_active_destination', targetCity);
+
     const interval = setInterval(() => {
       setCurrentStep((prev) => {
         if (prev < aiSteps.length - 1) return prev + 1;
@@ -110,7 +113,7 @@ export const TripPlannerPage: React.FC = () => {
     try {
       const travelersCount = parseInt(travelers.split(' ')[0]) || 2;
       const res = await travelApi.planTrip({
-        destination: destination.split(',')[0].trim(),
+        destination: targetCity,
         start_date: startDate,
         end_date: endDate,
         travelers_count: travelersCount,
@@ -121,14 +124,16 @@ export const TripPlannerPage: React.FC = () => {
       });
 
       clearInterval(interval);
+      const tripId = res.data.id || 1;
+      localStorage.setItem('travel_copilot_active_trip_id', String(tripId));
       setTimeout(() => {
-        navigate(`/itinerary/${res.data.id || 1}`);
+        navigate(`/itinerary/${tripId}?dest=${encodeURIComponent(targetCity)}`);
       }, 500);
     } catch (err) {
       console.error("Trip planning error:", err);
       clearInterval(interval);
       setIsGenerating(false);
-      navigate('/itinerary/1');
+      navigate(`/itinerary/1?dest=${encodeURIComponent(targetCity)}`);
     }
   };
 
@@ -151,7 +156,7 @@ export const TripPlannerPage: React.FC = () => {
     if (d.includes('dubai')) return [25.2048, 55.2708];
     if (d.includes('bali')) return [-8.3405, 115.0920];
     if (d.includes('maldives')) return [4.1755, 73.5093];
-    return [20.5937, 78.9629]; // Default India Center
+    return [20.5937, 78.9629];
   };
 
   return (

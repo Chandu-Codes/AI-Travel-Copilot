@@ -69,14 +69,16 @@ export interface Hotel {
   hotel_id: string;
   name: string;
   city: string;
+  country?: string;
   tier: string;
   price_per_night_inr: number;
   star_rating: number;
   review_score: number;
-  total_reviews: number;
+  total_reviews?: number;
   amenities: string;
-  lat: number;
-  lon: number;
+  address?: string;
+  lat?: number;
+  lon?: number;
   image_url: string;
   ai_recommendation_score: number;
   sentiment_summary?: {
@@ -98,6 +100,8 @@ export interface FlightItem {
   airline: string;
   source_city: string;
   destination_city: string;
+  destination_airport?: string;
+  flight_number?: string;
   departure_time: string;
   duration_hrs: number;
   stops: string;
@@ -118,16 +122,21 @@ export interface Expense {
 }
 
 export interface DisruptionAlert {
-  event_id: string;
-  flight_number: string;
-  airline: string;
-  route: string;
-  scheduled_departure: string;
+  event_id?: string;
+  disruption_id?: string;
+  flight_number?: string;
+  airline?: string;
+  route?: string;
+  city?: string;
+  type?: string;
+  title?: string;
+  description?: string;
+  scheduled_departure?: string;
   status: string;
   severity: string;
-  delay_reason: string;
+  delay_reason?: string;
   impact: string;
-  rebooking_action: string;
+  rebooking_action?: string;
 }
 
 export interface ChatMessage {

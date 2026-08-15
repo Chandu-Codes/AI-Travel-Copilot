@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Plane, 
   Search, 
@@ -7,7 +8,8 @@ import {
   AlertTriangle, 
   ShieldCheck, 
   ArrowRight,
-  TrendingDown
+  TrendingDown,
+  MapPin
 } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { Navbar } from '../components/Navbar';
@@ -15,23 +17,42 @@ import { travelApi } from '../services/api';
 import { FlightItem } from '../types';
 
 export const FlightsPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialDest = searchParams.get('destination') || localStorage.getItem('travel_copilot_active_destination') || 'Goa';
+
   const [source, setSource] = useState('Delhi');
-  const [destination, setDestination] = useState('Goa');
+  const [destination, setDestination] = useState(initialDest);
   const [daysLeft, setDaysLeft] = useState(15);
   const [flights, setFlights] = useState<FlightItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchFlights = () => {
+  const popularDestinations = ['Manali', 'Goa', 'Paris', 'Switzerland', 'Jaipur', 'Munnar', 'Kerala', 'Japan', 'Bali', 'Dubai', 'Maldives', 'Ladakh'];
+
+  const fetchFlights = (destQuery?: string) => {
     setLoading(true);
-    travelApi.searchFlights(source, destination, daysLeft)
+    const dest = destQuery || destination;
+    travelApi.searchFlights(source, dest, daysLeft)
       .then(res => setFlights(res.data.flights))
       .catch(err => console.error("Flight error:", err))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-    fetchFlights();
-  }, []);
+    fetchFlights(destination);
+  }, [destination]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearchParams({ destination });
+    localStorage.setItem('travel_copilot_active_destination', destination);
+    fetchFlights(destination);
+  };
+
+  const handleSelectQuick = (place: string) => {
+    setDestination(place);
+    setSearchParams({ destination: place });
+    localStorage.setItem('travel_copilot_active_destination', place);
+  };
 
   return (
     <div className="flex min-h-screen bg-[#f8fafc]">
@@ -40,29 +61,57 @@ export const FlightsPage: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar 
           title="Flight Fares & Disruption Risk" 
-          subtitle="Machine Learning price predictions (RandomForest R²=0.97) and live delay risk analysis" 
+          subtitle="Machine Learning price predictions and real-time delay risk analysis" 
         />
 
         <main className="p-8 max-w-7xl w-full space-y-6">
+          {/* Active Trip Notice */}
+          <div className="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-semibold flex items-center gap-2 shadow-2xs">
+            <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
+            <span>Showing flight routes, airline options, and ML price predictions for <strong>{destination}</strong></span>
+          </div>
+
+          {/* Quick Destination Chips */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            <span className="text-[11px] font-bold text-slate-400 uppercase shrink-0">Popular:</span>
+            <div className="flex gap-1.5 flex-nowrap">
+              {popularDestinations.map((d) => (
+                <button
+                  key={d}
+                  onClick={() => handleSelectQuick(d)}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold transition shrink-0 ${
+                    destination.toLowerCase() === d.toLowerCase()
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Search Header */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+          <form onSubmit={handleSearch} className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">From</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">From (Origin)</label>
               <input
                 type="text"
                 value={source}
                 onChange={(e) => setSource(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-slate-50"
+                placeholder="e.g. Delhi / Mumbai"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-slate-50 outline-none focus:border-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">To</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">To (Destination)</label>
               <input
                 type="text"
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-slate-50"
+                placeholder="e.g. Manali, Paris, Goa, Switzerland"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-slate-50 outline-none focus:border-blue-500"
               />
             </div>
 
@@ -74,18 +123,18 @@ export const FlightsPage: React.FC = () => {
                 max="60"
                 value={daysLeft}
                 onChange={(e) => setDaysLeft(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-slate-50"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-slate-50 outline-none focus:border-blue-500"
               />
             </div>
 
             <button
-              onClick={fetchFlights}
+              type="submit"
               className="py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2"
             >
               <Search className="w-4 h-4" />
-              <span>Predict Fares</span>
+              <span>Search Flights</span>
             </button>
-          </div>
+          </form>
 
           {/* Flights Cards List */}
           <div className="space-y-4">
@@ -111,7 +160,10 @@ export const FlightsPage: React.FC = () => {
                         {f.recommended_badge}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5">{f.source_city} → {f.destination_city} • {f.departure_time}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {f.source_city} &rarr; <strong>{f.destination_city}</strong> ({f.destination_airport || f.destination_city})
+                    </p>
+                    <p className="text-[11px] text-slate-400">{f.departure_time} • Flight {f.flight_number || '6E-402'}</p>
                   </div>
                 </div>
 
@@ -119,7 +171,7 @@ export const FlightsPage: React.FC = () => {
                 <div className="flex items-center gap-8 text-xs text-slate-600">
                   <div>
                     <span className="text-[10px] text-slate-400 block">Flight Duration</span>
-                    <span className="font-bold text-slate-900">{f.duration_hrs} Hours (Non-stop)</span>
+                    <span className="font-bold text-slate-900">{f.duration_hrs}h ({f.stops})</span>
                   </div>
 
                   <div>
@@ -136,13 +188,13 @@ export const FlightsPage: React.FC = () => {
                 {/* Price & Action */}
                 <div className="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
                   <div className="text-left md:text-right">
-                    <span className="text-[10px] text-slate-400 font-medium">ML Predicted Fare</span>
+                    <span className="text-[10px] text-slate-400 font-medium">Predicted Fare</span>
                     <p className="text-xl font-extrabold text-blue-600">₹{f.predicted_price_inr.toLocaleString('en-IN')}</p>
                     <span className="text-[10px] text-slate-400 font-medium">Range: {f.price_range_inr}</span>
                   </div>
 
                   <button
-                    onClick={() => alert(`Selected ${f.airline} flight (${f.source_city} -> ${f.destination_city}) for booking!`)}
+                    onClick={() => alert(`Selected ${f.airline} flight to ${f.destination_city} (${f.destination_airport || f.destination_city}) for booking!`)}
                     className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition"
                   >
                     Select Flight

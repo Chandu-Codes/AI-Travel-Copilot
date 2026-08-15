@@ -46,7 +46,7 @@ export const travelApi = {
 
   // Flights
   searchFlights: (source = "Delhi", destination = "Goa", days_left = 15) => 
-    api.get(`/flights/search?source_city=${source}&destination_city=${destination}&days_left=${days_left}`),
+    api.get(`/flights/search?source_city=${encodeURIComponent(source)}&destination_city=${encodeURIComponent(destination)}&days_left=${days_left}`),
   predictFlight: (payload: any) => api.post('/flights/predict', payload),
 
   // Budget & Expenses
@@ -56,13 +56,15 @@ export const travelApi = {
   deleteExpense: (id: number) => api.delete(`/budget/expenses/${id}`),
 
   // Disruptions
-  getDisruptions: () => api.get('/disruptions'),
+  getDisruptions: (destination?: string) => 
+    api.get(destination ? `/disruptions?destination=${encodeURIComponent(destination)}` : '/disruptions'),
   checkFlightStatus: (flightNumber: string) => api.get(`/disruptions/check-flight?flight_number=${flightNumber}`),
-  simulateRebooking: (flightNumber = "6E-204") => api.post(`/disruptions/rebook-simulation?flight_number=${flightNumber}`),
+  simulateRebooking: (flightNumber = "6E-204", destination = "Goa") => 
+    api.post(`/disruptions/rebook-simulation?flight_number=${encodeURIComponent(flightNumber)}&destination=${encodeURIComponent(destination)}`),
 
   // Chat Copilot
   sendMessage: (message: string) => api.post('/chat', { message }),
 
   // Weather
-  getWeather: (destination = "Goa") => api.get(`/weather?destination=${destination}`),
+  getWeather: (destination = "Goa") => api.get(`/weather?destination=${encodeURIComponent(destination)}`),
 };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Building2, 
   Star, 
@@ -8,7 +9,8 @@ import {
   Search, 
   Filter,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  Sliders
 } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { Navbar } from '../components/Navbar';
@@ -16,24 +18,48 @@ import { travelApi } from '../services/api';
 import { Hotel } from '../types';
 
 export const HotelsPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialCity = searchParams.get('city') || localStorage.getItem('travel_copilot_active_destination') || 'All';
+  
   const [hotels, setHotels] = useState<Hotel[]>([]);
-  const [selectedCity, setSelectedCity] = useState('All');
+  const [selectedCity, setSelectedCity] = useState(initialCity);
+  const [customSearch, setCustomSearch] = useState('');
   const [selectedTier, setSelectedTier] = useState('All');
   const [bookedHotel, setBookedHotel] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const cities = ['All', 'Goa', 'Jaipur', 'Alleppey', 'Kochi', 'Munnar'];
+  const popularCities = ['All', 'Manali', 'Goa', 'Paris', 'Switzerland', 'Jaipur', 'Munnar', 'Kerala', 'Japan', 'Bali', 'Dubai', 'Maldives', 'Ladakh'];
   const tiers = ['All', 'Luxury', 'Mid-Range', 'Budget / Hostel'];
 
-  useEffect(() => {
+  const fetchHotels = (cityQuery?: string) => {
+    setLoading(true);
+    const c = cityQuery !== undefined ? cityQuery : selectedCity;
     travelApi.getHotels({
-      city: selectedCity === 'All' ? undefined : selectedCity,
+      city: (!c || c === 'All') ? undefined : c,
       tier: selectedTier === 'All' ? undefined : selectedTier
     })
       .then(res => setHotels(res.data))
       .catch(err => console.error("Hotels fetch error:", err))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchHotels(selectedCity);
   }, [selectedCity, selectedTier]);
+
+  const handleCitySelect = (city: string) => {
+    setSelectedCity(city);
+    setSearchParams(city === 'All' ? {} : { city });
+    localStorage.setItem('travel_copilot_active_destination', city === 'All' ? '' : city);
+  };
+
+  const handleCustomSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (customSearch.trim()) {
+      setSelectedCity(customSearch.trim());
+      setSearchParams({ city: customSearch.trim() });
+    }
+  };
 
   const handleBookAssist = async (hotelId: string) => {
     try {
@@ -56,17 +82,56 @@ export const HotelsPage: React.FC = () => {
         />
 
         <main className="p-8 max-w-7xl w-full space-y-6">
-          {/* Filter Header */}
-          <div className="bg-white p-4 rounded-3xl border border-slate-200/80 shadow-xs flex flex-wrap gap-4 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-500 uppercase">City:</span>
-              <div className="flex gap-1.5 overflow-x-auto">
-                {cities.map((city) => (
+          {/* Active Filter Notice */}
+          {selectedCity && selectedCity !== 'All' && (
+            <div className="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-semibold flex items-center justify-between shadow-2xs">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
+                <span>Showing verified hotels & stays matching your trip to <strong>{selectedCity}</strong></span>
+              </div>
+              <button 
+                onClick={() => handleCitySelect('All')}
+                className="text-[11px] text-blue-700 underline font-bold hover:text-blue-900"
+              >
+                Clear Filter (View All)
+              </button>
+            </div>
+          )}
+
+          {/* Search & Filter Header */}
+          <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+            {/* Custom Search Input */}
+            <form onSubmit={handleCustomSearch} className="flex gap-2">
+              <div className="relative flex-1">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <Search className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  value={customSearch}
+                  onChange={(e) => setCustomSearch(e.target.value)}
+                  placeholder="Search hotels in any city (e.g. Manali, Paris, Goa, Switzerland, Tokyo)..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 text-xs font-semibold text-slate-900 bg-slate-50 outline-none"
+                />
+              </div>
+              <button
+                type="submit"
+                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition"
+              >
+                Search
+              </button>
+            </form>
+
+            {/* City Quick Chips */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              <span className="text-[11px] font-bold text-slate-400 uppercase shrink-0">City:</span>
+              <div className="flex gap-1.5 flex-nowrap">
+                {popularCities.map((city) => (
                   <button
                     key={city}
-                    onClick={() => setSelectedCity(city)}
-                    className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
-                      selectedCity === city
+                    onClick={() => handleCitySelect(city)}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold transition shrink-0 ${
+                      selectedCity.toLowerCase() === city.toLowerCase()
                         ? 'bg-blue-600 text-white shadow-xs'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
@@ -77,8 +142,9 @@ export const HotelsPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-500 uppercase">Tier:</span>
+            {/* Tier Filter */}
+            <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+              <span className="text-[11px] font-bold text-slate-400 uppercase">Tier:</span>
               <div className="flex gap-1.5">
                 {tiers.map((tier) => (
                   <button
@@ -86,7 +152,7 @@ export const HotelsPage: React.FC = () => {
                     onClick={() => setSelectedTier(tier)}
                     className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
                       selectedTier === tier
-                        ? 'bg-blue-600 text-white shadow-xs'
+                        ? 'bg-slate-900 text-white shadow-xs'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
@@ -95,6 +161,11 @@ export const HotelsPage: React.FC = () => {
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* Loading / Results count */}
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+            <span>Found {hotels.length} verified accommodations</span>
           </div>
 
           {/* Hotels Grid */}
@@ -126,7 +197,7 @@ export const HotelsPage: React.FC = () => {
                         <h3 className="font-bold text-slate-900 text-base leading-tight">{hotel.name}</h3>
                         <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                           <MapPin className="w-3 h-3 text-slate-400" />
-                          <span>{hotel.city}, India</span>
+                          <span>{hotel.city}, {hotel.country || 'Global'}</span>
                         </p>
                       </div>
                       <div className="flex items-center gap-1 px-2 py-1 bg-amber-50 rounded-lg text-amber-800 font-bold text-xs">
@@ -142,10 +213,10 @@ export const HotelsPage: React.FC = () => {
                       <div className="pt-2 border-t border-slate-100 space-y-1.5 text-[11px]">
                         <div className="flex items-center justify-between text-slate-600">
                           <span>NLP Cleanliness Score</span>
-                          <span className="font-bold text-emerald-600">94% Positive</span>
+                          <span className="font-bold text-emerald-600">96% Positive</span>
                         </div>
                         <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div className="w-[94%] h-full bg-emerald-500 rounded-full" />
+                          <div className="w-[96%] h-full bg-emerald-500 rounded-full" />
                         </div>
                       </div>
                     )}
