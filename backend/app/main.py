@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .database import engine, Base
-from .models.entities import User, Trip, ItineraryDay, Activity, Expense, DisruptionEvent
+from .models.entities import User, Trip, ItineraryDay, Activity, Expense, DisruptionEvent, Booking
 
 # Import API routers
 from .api.auth import router as auth_router
@@ -17,6 +17,8 @@ from .api.budget import router as budget_router
 from .api.disruptions import router as disruptions_router
 from .api.chat import router as chat_router
 from .api.weather import router as weather_router
+from .api.bookings import router as bookings_router
+from .api.dashboard import router as dashboard_router
 
 # Create DB tables
 Base.metadata.create_all(bind=engine)
@@ -38,6 +40,8 @@ app.add_middleware(
 
 # Include all API Routers
 app.include_router(auth_router, prefix=settings.API_V1_STR)
+app.include_router(dashboard_router, prefix=settings.API_V1_STR)
+app.include_router(bookings_router, prefix=settings.API_V1_STR)
 app.include_router(trips_router, prefix=settings.API_V1_STR)
 app.include_router(destinations_router, prefix=settings.API_V1_STR)
 app.include_router(recommendations_router, prefix=settings.API_V1_STR)

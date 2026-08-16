@@ -181,16 +181,21 @@ class ExpenseResponse(BaseModel):
 
 # --- Disruption Schemas ---
 class DisruptionItem(BaseModel):
-    event_id: str
-    flight_number: str
-    airline: str
-    route: str
-    scheduled_departure: str
-    status: str
-    severity: str
-    delay_reason: str
-    impact: str
-    rebooking_action: str
+    event_id: Optional[str] = "EVT-01"
+    disruption_id: Optional[str] = "DIS-01"
+    flight_number: Optional[str] = "6E-204"
+    airline: Optional[str] = "IndiGo"
+    route: Optional[str] = "Transit Route"
+    city: Optional[str] = "Global"
+    type: Optional[str] = "Advisory"
+    title: Optional[str] = "Travel Advisory"
+    description: Optional[str] = ""
+    scheduled_departure: Optional[str] = "10:30 AM"
+    status: Optional[str] = "Active"
+    severity: Optional[str] = "Moderate"
+    delay_reason: Optional[str] = ""
+    impact: Optional[str] = "Standard operations"
+    rebooking_action: Optional[str] = "Autonomous AI Monitoring"
 
 # --- Chat Copilot Schemas ---
 class ChatMessage(BaseModel):

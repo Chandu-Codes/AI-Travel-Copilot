@@ -24,7 +24,24 @@ export const FlightsPage: React.FC = () => {
   const [destination, setDestination] = useState(initialDest);
   const [daysLeft, setDaysLeft] = useState(15);
   const [flights, setFlights] = useState<FlightItem[]>([]);
+  const [bookedFlight, setBookedFlight] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleSelectFlight = async (f: FlightItem) => {
+    try {
+      await travelApi.createBooking({
+        booking_type: "Flight",
+        item_name: `${f.airline} Flight ${f.flight_number || '6E-402'}`,
+        destination: f.destination_city,
+        amount_inr: f.predicted_price_inr,
+        details: `${f.source_city} -> ${f.destination_city} • ${f.cabin_class} (${f.stops})`
+      });
+      setBookedFlight(`${f.airline}-${f.departure_time}`);
+      setTimeout(() => setBookedFlight(null), 3000);
+    } catch (err) {
+      console.error("Flight booking error:", err);
+    }
+  };
 
   const popularDestinations = ['Manali', 'Goa', 'Paris', 'Switzerland', 'Jaipur', 'Munnar', 'Kerala', 'Japan', 'Bali', 'Dubai', 'Maldives', 'Ladakh'];
 
@@ -194,10 +211,14 @@ export const FlightsPage: React.FC = () => {
                   </div>
 
                   <button
-                    onClick={() => alert(`Selected ${f.airline} flight to ${f.destination_city} (${f.destination_airport || f.destination_city}) for booking!`)}
-                    className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition"
+                    onClick={() => handleSelectFlight(f)}
+                    className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5"
                   >
-                    Select Flight
+                    {bookedFlight === `${f.airline}-${f.departure_time}` ? (
+                      <span className="text-emerald-400 font-bold">Flight Reserved!</span>
+                    ) : (
+                      <span>Select Flight</span>
+                    )}
                   </button>
                 </div>
               </div>

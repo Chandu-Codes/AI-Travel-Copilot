@@ -29,6 +29,22 @@ export const travelApi = {
   getProfile: (email?: string) => 
     api.get(email ? `/auth/me?email=${email}` : '/auth/me'),
 
+  // Dashboard Dynamic Metrics
+  getDashboardStats: () => api.get('/dashboard/stats'),
+
+  // Bookings Tracker
+  getBookings: () => api.get('/bookings'),
+  createBooking: (payload: {
+    booking_type: string;
+    item_name: string;
+    destination: string;
+    amount_inr: number;
+    details?: string;
+    trip_id?: number;
+    booking_date?: string;
+  }) => api.post('/bookings', payload),
+  cancelBooking: (id: number) => api.delete(`/bookings/${id}`),
+
   // Trips & Itineraries
   getTrips: () => api.get('/trips'),
   getTripById: (id: number | string) => api.get(`/trips/${id}`),

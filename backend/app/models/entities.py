@@ -17,6 +17,7 @@ class User(Base):
     
     trips = relationship("Trip", back_populates="user", cascade="all, delete-orphan")
     expenses = relationship("Expense", back_populates="user", cascade="all, delete-orphan")
+    bookings = relationship("Booking", back_populates="user", cascade="all, delete-orphan")
 
 class Trip(Base):
     __tablename__ = "trips"
@@ -42,6 +43,7 @@ class Trip(Base):
     user = relationship("User", back_populates="trips")
     itinerary_days = relationship("ItineraryDay", back_populates="trip", cascade="all, delete-orphan", order_by="ItineraryDay.day_number")
     expenses = relationship("Expense", back_populates="trip", cascade="all, delete-orphan")
+    bookings = relationship("Booking", back_populates="trip", cascade="all, delete-orphan")
 
 class ItineraryDay(Base):
     __tablename__ = "itinerary_days"
@@ -92,6 +94,25 @@ class Expense(Base):
     
     user = relationship("User", back_populates="expenses")
     trip = relationship("Trip", back_populates="expenses")
+
+class Booking(Base):
+    __tablename__ = "bookings"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    trip_id = Column(Integer, ForeignKey("trips.id"), nullable=True)
+    booking_type = Column(String(50), nullable=False) # "Hotel" or "Flight"
+    item_name = Column(String(255), nullable=False)
+    reference_code = Column(String(100), unique=True, index=True, nullable=False)
+    destination = Column(String(100), default="")
+    amount_inr = Column(Float, default=0.0)
+    status = Column(String(50), default="Confirmed")
+    details = Column(String(255), default="")
+    booking_date = Column(String(50), default="")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    user = relationship("User", back_populates="bookings")
+    trip = relationship("Trip", back_populates="bookings")
 
 class DisruptionEvent(Base):
     __tablename__ = "disruption_events"

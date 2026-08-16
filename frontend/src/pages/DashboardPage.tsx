@@ -22,14 +22,33 @@ export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [featured, setFeatured] = useState<IDestinationCard[]>([]);
+  const [stats, setStats] = useState({
+    upcoming_trips_count: 2,
+    total_bookings_count: 5,
+    places_visited_count: 12,
+    travel_days_count: 28,
+    active_upcoming_trip: null as any
+  });
 
   const userName = user?.name ? user.name.split(' ')[0] : 'Chandu';
 
   useEffect(() => {
+    // Fetch featured destinations
     travelApi.getFeaturedDestinations()
       .then(res => setFeatured(res.data))
       .catch(err => console.error("Error fetching destinations:", err));
+
+    // Fetch dynamic dashboard stats & active upcoming trip
+    travelApi.getDashboardStats()
+      .then(res => {
+        if (res.data) {
+          setStats(res.data);
+        }
+      })
+      .catch(err => console.error("Error fetching dashboard stats:", err));
   }, []);
+
+  const upcomingTrip = stats.active_upcoming_trip;
 
   return (
     <div className="flex min-h-screen bg-[#f8fafc]">
@@ -42,59 +61,71 @@ export const DashboardPage: React.FC = () => {
         />
 
         <main className="p-8 space-y-8 max-w-7xl w-full">
-          {/* 4 Statistics Cards (Matching Reference UI) */}
+          {/* 4 Statistics Cards (Matching Reference UI with Dynamic Values) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {/* Card 1: Upcoming Trips */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition">
+            <div 
+              onClick={() => navigate('/itinerary/1')}
+              className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition cursor-pointer"
+            >
               <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                 <Calendar className="w-6 h-6" />
               </div>
               <div>
                 <p className="text-xs font-medium text-slate-400">Upcoming Trip</p>
                 <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="text-2xl font-extrabold text-slate-900">2</span>
+                  <span className="text-2xl font-extrabold text-slate-900">{stats.upcoming_trips_count}</span>
                   <span className="text-xs font-semibold text-slate-500">Trips</span>
                 </div>
               </div>
             </div>
 
             {/* Card 2: Total Bookings */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition">
+            <div 
+              onClick={() => navigate('/hotels')}
+              className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition cursor-pointer"
+            >
               <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
                 <Briefcase className="w-6 h-6" />
               </div>
               <div>
                 <p className="text-xs font-medium text-slate-400">Total Bookings</p>
                 <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="text-2xl font-extrabold text-slate-900">5</span>
+                  <span className="text-2xl font-extrabold text-slate-900">{stats.total_bookings_count}</span>
                   <span className="text-xs font-semibold text-slate-500">Bookings</span>
                 </div>
               </div>
             </div>
 
             {/* Card 3: Places Visited */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition">
+            <div 
+              onClick={() => navigate('/explore')}
+              className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition cursor-pointer"
+            >
               <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                 <MapPin className="w-6 h-6" />
               </div>
               <div>
                 <p className="text-xs font-medium text-slate-400">Places Visited</p>
                 <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="text-2xl font-extrabold text-slate-900">12</span>
+                  <span className="text-2xl font-extrabold text-slate-900">{stats.places_visited_count}</span>
                   <span className="text-xs font-semibold text-slate-500">Destinations</span>
                 </div>
               </div>
             </div>
 
             {/* Card 4: Travel Days */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition">
+            <div 
+              onClick={() => navigate('/plan-trip')}
+              className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition cursor-pointer"
+            >
               <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                 <Clock className="w-6 h-6" />
               </div>
               <div>
                 <p className="text-xs font-medium text-slate-400">Travel Days</p>
                 <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="text-2xl font-extrabold text-slate-900">28</span>
+                  <span className="text-2xl font-extrabold text-slate-900">{stats.travel_days_count}</span>
                   <span className="text-xs font-semibold text-slate-500">Days</span>
                 </div>
               </div>
@@ -113,24 +144,30 @@ export const DashboardPage: React.FC = () => {
                 </span>
               </div>
 
-              {/* Panoramic Banner Card */}
+              {/* Panoramic Banner Card with Dynamic Trip Data */}
               <div className="px-6 pb-6">
                 <div className="relative rounded-2xl overflow-hidden aspect-[21/9] w-full shadow-inner">
                   <img
-                    src="https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=1200&q=80"
-                    alt="Greek Island Adventure"
+                    src={upcomingTrip?.image_url || "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=1200&q=80"}
+                    alt={upcomingTrip?.title || "Upcoming Trip"}
                     className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
 
                   <div className="absolute bottom-4 left-5 right-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-white">
                     <div>
-                      <h4 className="font-extrabold text-xl sm:text-2xl drop-shadow-sm">Greek Island Adventure</h4>
-                      <p className="text-xs text-slate-200 font-medium mt-0.5">14 – 21 June 2025 • Santorini, Mykonos, Crete</p>
+                      <h4 className="font-extrabold text-xl sm:text-2xl drop-shadow-sm">
+                        {upcomingTrip?.title || "Greek Island Adventure"}
+                      </h4>
+                      <p className="text-xs text-slate-200 font-medium mt-0.5">
+                        {upcomingTrip 
+                          ? `${upcomingTrip.start_date} – ${upcomingTrip.end_date} • ${upcomingTrip.destination}, ${upcomingTrip.country || 'Vacation'}`
+                          : "14 – 21 June 2025 • Santorini, Mykonos, Crete"}
+                      </p>
                     </div>
 
                     <button
-                      onClick={() => navigate('/itinerary/1')}
+                      onClick={() => navigate(upcomingTrip?.id ? `/itinerary/${upcomingTrip.id}?dest=${encodeURIComponent(upcomingTrip.destination)}` : '/itinerary/1')}
                       className="px-4 py-2 rounded-xl bg-white/90 hover:bg-white text-slate-900 font-bold text-xs shadow-md transition shrink-0 backdrop-blur-md flex items-center gap-1.5"
                     >
                       <span>View Itinerary</span>

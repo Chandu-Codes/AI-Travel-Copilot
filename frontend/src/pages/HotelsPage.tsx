@@ -61,10 +61,17 @@ export const HotelsPage: React.FC = () => {
     }
   };
 
-  const handleBookAssist = async (hotelId: string) => {
+  const handleBookAssist = async (hotel: Hotel) => {
     try {
-      await travelApi.bookHotelAssist(hotelId);
-      setBookedHotel(hotelId);
+      await travelApi.bookHotelAssist(hotel.hotel_id);
+      await travelApi.createBooking({
+        booking_type: "Hotel",
+        item_name: hotel.name,
+        destination: hotel.city,
+        amount_inr: hotel.price_per_night_inr * 3,
+        details: `${hotel.tier} • ${hotel.star_rating}★ Verified Stay`
+      });
+      setBookedHotel(hotel.hotel_id);
       setTimeout(() => setBookedHotel(null), 3000);
     } catch (err) {
       console.error("Booking error:", err);
@@ -232,7 +239,7 @@ export const HotelsPage: React.FC = () => {
                   </div>
 
                   <button
-                    onClick={() => handleBookAssist(hotel.hotel_id)}
+                    onClick={() => handleBookAssist(hotel)}
                     className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5"
                   >
                     {bookedHotel === hotel.hotel_id ? (
