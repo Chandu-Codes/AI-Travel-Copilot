@@ -3,6 +3,7 @@ import pandas as pd
 from fastapi import APIRouter, Query, HTTPException
 from typing import List, Optional
 from ..ml.sentiment_service import hotel_sentiment_service
+from ..utils.path_helper import resolve_path
 
 router = APIRouter(prefix="/hotels", tags=["Hotels & Accommodations"])
 
@@ -15,10 +16,11 @@ def get_hotels(
     max_price: Optional[float] = None,
     min_rating: Optional[float] = None
 ):
-    if not os.path.exists(HOTELS_CSV):
+    resolved = resolve_path(HOTELS_CSV)
+    if not os.path.exists(resolved):
         return []
         
-    df = pd.read_csv(HOTELS_CSV)
+    df = pd.read_csv(resolved)
     
     if city and city.strip() and city.lower() != "all":
         city_clean = city.strip().lower()
@@ -59,10 +61,7 @@ def get_hotels(
 @router.post("/book-assist")
 def request_booking_assistance(hotel_id: str, guest_name: str = "Chandu", nights: int = 4):
     return {
-        "status": "success",
-        "booking_reference": f"BKG-AI-{hotel_id[-4:]}-2026",
-        "hotel_id": hotel_id,
-        "guest_name": guest_name,
-        "nights": nights,
-        "message": "AI Concierge has reserved provisional rates and added stay to your active itinerary."
+        "status": "confirmed",
+        "booking_reference": f"TCP-HTL-{hotel_id[:4].upper()}-992",
+        "message": f"Pre-booking inquiry registered for {guest_name}. Hotel will hold best rates for {nights} nights."
     }

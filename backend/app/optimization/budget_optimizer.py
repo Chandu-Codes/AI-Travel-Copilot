@@ -1,6 +1,6 @@
 import json
 import os
-import pulp
+from ..utils.path_helper import resolve_path
 
 BENCHMARK_PATH = "datasets/budgets/budget_benchmarks.json"
 
@@ -9,12 +9,13 @@ class BudgetOptimizer:
         self.benchmarks = self._load_benchmarks()
 
     def _load_benchmarks(self):
-        if os.path.exists(BENCHMARK_PATH):
+        resolved = resolve_path(BENCHMARK_PATH)
+        if os.path.exists(resolved):
             try:
-                with open(BENCHMARK_PATH, "r", encoding="utf-8") as f:
+                with open(resolved, "r", encoding="utf-8") as f:
                     return json.load(f)
             except Exception as e:
-                print(f"Error loading budget benchmarks: {e}")
+                print(f"Error loading budget benchmarks from {resolved}: {e}")
         return {
             "budget_split_rules": {
                 "Budget_Backpacker": {"stay_pct": 25, "transport_pct": 35, "activities_pct": 20, "food_pct": 15, "buffer_pct": 5},

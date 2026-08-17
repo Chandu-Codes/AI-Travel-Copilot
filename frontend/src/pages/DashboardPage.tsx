@@ -6,9 +6,8 @@ import {
   MapPin, 
   Clock, 
   ArrowRight, 
-  Plus, 
-  Sparkles,
-  ChevronRight,
+  ChevronRight, 
+  Send,
   Bot
 } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
@@ -22,6 +21,7 @@ export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [featured, setFeatured] = useState<IDestinationCard[]>([]);
+  const [searchPrompt, setSearchPrompt] = useState('');
   const [stats, setStats] = useState({
     upcoming_trips_count: 2,
     total_bookings_count: 5,
@@ -48,34 +48,57 @@ export const DashboardPage: React.FC = () => {
       .catch(err => console.error("Error fetching dashboard stats:", err));
   }, []);
 
-  const upcomingTrip = stats.active_upcoming_trip;
+  const handleQuickPrompt = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchPrompt.trim()) return;
+    navigate(`/assistant?q=${encodeURIComponent(searchPrompt)}`);
+  };
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc]">
+    <div className="flex min-h-screen bg-[#F5EFE6] text-[#0C0A09] font-sans">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar 
-          title={`Hello, ${userName} 👋`} 
-          subtitle="Where would you like to explore today?" 
+          title={`Good morning, ${userName}! 👋`} 
+          subtitle="Where do you want to go today?" 
         />
 
-        <main className="p-8 space-y-8 max-w-7xl w-full">
-          {/* 4 Statistics Cards (Matching Reference UI with Dynamic Values) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <main className="p-6 sm:p-8 space-y-8 max-w-7xl w-full">
+          {/* Quick AI Search Prompt Bar */}
+          <form onSubmit={handleQuickPrompt} className="relative w-full">
+            <div className="bg-white p-2 sm:p-2.5 rounded-full border border-[#DDCFBD] shadow-warm flex items-center gap-3">
+              <input
+                type="text"
+                value={searchPrompt}
+                onChange={(e) => setSearchPrompt(e.target.value)}
+                placeholder="Describe your dream trip... (e.g. 5 days in Switzerland for 2 people with scenic trains)"
+                className="flex-1 bg-transparent border-none outline-none text-xs sm:text-sm text-[#0C0A09] placeholder-[#78716C] px-4 font-semibold"
+              />
+              <button
+                type="submit"
+                className="w-10 h-10 rounded-full bg-[#9E3816] hover:bg-[#832C0E] text-white flex items-center justify-center shrink-0 shadow-warm transition"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+          </form>
+
+          {/* 4 Statistics Metrics Cards with Deep Black Numbers */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Upcoming Trips */}
             <div 
               onClick={() => navigate('/itinerary/1')}
-              className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition cursor-pointer"
+              className="bg-white p-5 rounded-3xl border border-[#DDCFBD] shadow-warm-sm flex items-center gap-4 hover:shadow-warm hover:border-[#9E3816]/50 transition cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-[#FDECE4] text-[#9E3816] flex items-center justify-center shrink-0">
                 <Calendar className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-400">Upcoming Trip</p>
+                <p className="text-xs font-bold text-[#44403C]">Upcoming Trips</p>
                 <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="text-2xl font-extrabold text-slate-900">{stats.upcoming_trips_count}</span>
-                  <span className="text-xs font-semibold text-slate-500">Trips</span>
+                  <span className="font-serif text-2xl font-black text-[#0C0A09]">{stats.upcoming_trips_count}</span>
+                  <span className="text-xs font-extrabold text-[#292524]">Trips</span>
                 </div>
               </div>
             </div>
@@ -83,16 +106,16 @@ export const DashboardPage: React.FC = () => {
             {/* Card 2: Total Bookings */}
             <div 
               onClick={() => navigate('/hotels')}
-              className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition cursor-pointer"
+              className="bg-white p-5 rounded-3xl border border-[#DDCFBD] shadow-warm-sm flex items-center gap-4 hover:shadow-warm hover:border-[#9E3816]/50 transition cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-[#FDECE4] text-[#9E3816] flex items-center justify-center shrink-0">
                 <Briefcase className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-400">Total Bookings</p>
+                <p className="text-xs font-bold text-[#44403C]">Total Bookings</p>
                 <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="text-2xl font-extrabold text-slate-900">{stats.total_bookings_count}</span>
-                  <span className="text-xs font-semibold text-slate-500">Bookings</span>
+                  <span className="font-serif text-2xl font-black text-[#0C0A09]">{stats.total_bookings_count}</span>
+                  <span className="text-xs font-extrabold text-[#292524]">Bookings</span>
                 </div>
               </div>
             </div>
@@ -100,16 +123,16 @@ export const DashboardPage: React.FC = () => {
             {/* Card 3: Places Visited */}
             <div 
               onClick={() => navigate('/explore')}
-              className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition cursor-pointer"
+              className="bg-white p-5 rounded-3xl border border-[#DDCFBD] shadow-warm-sm flex items-center gap-4 hover:shadow-warm hover:border-[#9E3816]/50 transition cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-[#FDECE4] text-[#9E3816] flex items-center justify-center shrink-0">
                 <MapPin className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-400">Places Visited</p>
+                <p className="text-xs font-bold text-[#44403C]">Places Visited</p>
                 <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="text-2xl font-extrabold text-slate-900">{stats.places_visited_count}</span>
-                  <span className="text-xs font-semibold text-slate-500">Destinations</span>
+                  <span className="font-serif text-2xl font-black text-[#0C0A09]">{stats.places_visited_count}</span>
+                  <span className="text-xs font-extrabold text-[#292524]">Cities</span>
                 </div>
               </div>
             </div>
@@ -117,137 +140,32 @@ export const DashboardPage: React.FC = () => {
             {/* Card 4: Travel Days */}
             <div 
               onClick={() => navigate('/plan-trip')}
-              className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition cursor-pointer"
+              className="bg-white p-5 rounded-3xl border border-[#DDCFBD] shadow-warm-sm flex items-center gap-4 hover:shadow-warm hover:border-[#9E3816]/50 transition cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-[#FDECE4] text-[#9E3816] flex items-center justify-center shrink-0">
                 <Clock className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-400">Travel Days</p>
+                <p className="text-xs font-bold text-[#44403C]">Travel Days</p>
                 <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="text-2xl font-extrabold text-slate-900">{stats.travel_days_count}</span>
-                  <span className="text-xs font-semibold text-slate-500">Days</span>
+                  <span className="font-serif text-2xl font-black text-[#0C0A09]">{stats.travel_days_count}</span>
+                  <span className="text-xs font-extrabold text-[#292524]">Days</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Upcoming Trip Hero & Quick Actions Grid (Matching Reference UI) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Upcoming Trip Hero Banner */}
-            <div className="lg:col-span-8 bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm flex flex-col justify-between group">
-              <div className="p-6 pb-4 flex items-center justify-between">
-                <h3 className="font-bold text-slate-900 text-lg">Upcoming Trip</h3>
-                <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Confirmed & Ready
-                </span>
-              </div>
-
-              {/* Panoramic Banner Card with Dynamic Trip Data */}
-              <div className="px-6 pb-6">
-                <div className="relative rounded-2xl overflow-hidden aspect-[21/9] w-full shadow-inner">
-                  <img
-                    src={upcomingTrip?.image_url || "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=1200&q=80"}
-                    alt={upcomingTrip?.title || "Upcoming Trip"}
-                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
-
-                  <div className="absolute bottom-4 left-5 right-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-white">
-                    <div>
-                      <h4 className="font-extrabold text-xl sm:text-2xl drop-shadow-sm">
-                        {upcomingTrip?.title || "Greek Island Adventure"}
-                      </h4>
-                      <p className="text-xs text-slate-200 font-medium mt-0.5">
-                        {upcomingTrip 
-                          ? `${upcomingTrip.start_date} – ${upcomingTrip.end_date} • ${upcomingTrip.destination}, ${upcomingTrip.country || 'Vacation'}`
-                          : "14 – 21 June 2025 • Santorini, Mykonos, Crete"}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => navigate(upcomingTrip?.id ? `/itinerary/${upcomingTrip.id}?dest=${encodeURIComponent(upcomingTrip.destination)}` : '/itinerary/1')}
-                      className="px-4 py-2 rounded-xl bg-white/90 hover:bg-white text-slate-900 font-bold text-xs shadow-md transition shrink-0 backdrop-blur-md flex items-center gap-1.5"
-                    >
-                      <span>View Itinerary</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Actions (Matching Reference UI) */}
-            <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm flex flex-col justify-between">
-              <h3 className="font-bold text-slate-900 text-lg mb-4">Quick Actions</h3>
-
-              <div className="space-y-3 flex-1 flex flex-col justify-center">
-                {/* Action 1: Plan a New Trip */}
-                <div
-                  onClick={() => navigate('/plan-trip')}
-                  className="p-4 rounded-2xl border border-blue-100 bg-blue-50/50 hover:bg-blue-50 transition cursor-pointer flex items-center justify-between group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/20">
-                      <Sparkles className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition">Plan a New Trip</p>
-                      <p className="text-xs text-slate-500 font-medium">Get AI-powered itinerary</p>
-                    </div>
-                  </div>
-                  <Plus className="w-4 h-4 text-blue-600 group-hover:rotate-90 transition-transform" />
-                </div>
-
-                {/* Action 2: Explore Destinations */}
-                <div
-                  onClick={() => navigate('/explore')}
-                  className="p-4 rounded-2xl border border-slate-100 bg-slate-50/70 hover:bg-slate-50 transition cursor-pointer flex items-center justify-between group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0">
-                      <MapPin className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition">Explore Destinations</p>
-                      <p className="text-xs text-slate-500 font-medium">Discover amazing places</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
-                </div>
-
-                {/* Action 3: AI Travel Assistant */}
-                <div
-                  onClick={() => navigate('/assistant')}
-                  className="p-4 rounded-2xl border border-slate-100 bg-slate-50/70 hover:bg-slate-50 transition cursor-pointer flex items-center justify-between group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-indigo-500/20">
-                      <Bot className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition">AI Travel Assistant</p>
-                      <p className="text-xs text-slate-500 font-medium">Ask anything about travel</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Recommended For You Carousel / Grid (Matching Reference UI) */}
+          {/* Popular Destinations Grid */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-slate-900 text-lg">Recommended For You</h3>
-                <p className="text-xs font-medium text-slate-500">Curated with Hybrid Collaborative Filtering & Persona Matching</p>
+                <h3 className="font-serif font-extrabold text-[#0C0A09] text-xl">Popular Destinations</h3>
+                <p className="text-xs font-semibold text-[#44403C]">Curated with Hybrid AI & Persona Matching</p>
               </div>
 
               <button 
                 onClick={() => navigate('/explore')}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                className="text-xs font-bold text-[#9E3816] hover:text-[#832C0E] flex items-center gap-1"
               >
                 <span>View all</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -255,10 +173,93 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {featured.map((dest) => (
+              {featured.slice(0, 5).map((dest) => (
                 <DestinationCard key={dest.id} destination={dest} />
               ))}
             </div>
+          </div>
+
+          {/* Your Upcoming Trips Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif font-extrabold text-[#0C0A09] text-xl">Your Upcoming Trips</h3>
+              <button 
+                onClick={() => navigate('/itinerary/1')}
+                className="text-xs font-bold text-[#9E3816] hover:text-[#832C0E] flex items-center gap-1"
+              >
+                <span>View all</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Trip 1: Swiss Adventure */}
+              <div 
+                onClick={() => navigate('/itinerary/1?dest=Switzerland')}
+                className="bg-white p-4 rounded-3xl border border-[#DDCFBD] shadow-warm-sm hover:shadow-warm transition cursor-pointer flex items-center gap-4 group"
+              >
+                <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 bg-[#F5EFE6]">
+                  <img 
+                    src="https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=400&q=80" 
+                    alt="Swiss Adventure"
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-serif font-bold text-base text-[#0C0A09] truncate">Swiss Alps Adventure</h4>
+                    <span className="text-[10px] font-bold text-[#9E3816] bg-[#FDECE4] px-2.5 py-0.5 rounded-full">5 Days</span>
+                  </div>
+                  <p className="text-xs text-[#44403C] font-medium mt-0.5">Zurich · Interlaken · Lucerne</p>
+                  <p className="text-[11px] text-[#78716C] mt-1 font-semibold">15 – 22 Aug 2025</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-[#9E3816] group-hover:translate-x-1 transition-transform shrink-0" />
+              </div>
+
+              {/* Trip 2: Maldives Escape */}
+              <div 
+                onClick={() => navigate('/itinerary/1?dest=Maldives')}
+                className="bg-white p-4 rounded-3xl border border-[#DDCFBD] shadow-warm-sm hover:shadow-warm transition cursor-pointer flex items-center gap-4 group"
+              >
+                <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 bg-[#F5EFE6]">
+                  <img 
+                    src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=400&q=80" 
+                    alt="Maldives Escape"
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-serif font-bold text-base text-[#0C0A09] truncate">Maldives Island Escape</h4>
+                    <span className="text-[10px] font-bold text-[#9E3816] bg-[#FDECE4] px-2.5 py-0.5 rounded-full">6 Days</span>
+                  </div>
+                  <p className="text-xs text-[#44403C] font-medium mt-0.5">Male · Maafushi · Overwater Villas</p>
+                  <p className="text-[11px] text-[#78716C] mt-1 font-semibold">10 – 16 Sep 2025</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-[#9E3816] group-hover:translate-x-1 transition-transform shrink-0" />
+              </div>
+            </div>
+          </div>
+
+          {/* AI Banner: Let AI plan your perfect itinerary */}
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#DDCFBD] shadow-warm flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-[#FDECE4] text-[#9E3816] flex items-center justify-center shrink-0">
+                <Bot className="w-7 h-7" />
+              </div>
+              <div>
+                <h4 className="font-serif font-extrabold text-lg text-[#0C0A09]">Let AI plan your perfect itinerary ✨</h4>
+                <p className="text-xs text-[#44403C] mt-0.5 max-w-md font-medium">Answer a few quick questions and our Multi-Agent AI will craft a personalized day-by-day plan tailored to your budget and travel style.</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigate('/plan-trip')}
+              className="px-7 py-3 rounded-full bg-[#9E3816] hover:bg-[#832C0E] text-white font-bold text-xs shadow-terracotta transition shrink-0 flex items-center gap-2"
+            >
+              <span>Plan with AI</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
         </main>
       </div>

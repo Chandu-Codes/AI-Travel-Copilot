@@ -3,20 +3,28 @@ import joblib
 import pandas as pd
 import numpy as np
 from typing import List, Dict, Any
+from ..utils.path_helper import resolve_path
 
 PRICE_MODEL_PATH = "models/flight_price_model.joblib"
 DELAY_MODEL_PATH = "models/flight_delay_model.joblib"
 
 DESTINATION_AIRPORT_MAP = {
+    # Metros & Key Hubs
+    "hyderabad": {"code": "HYD", "airport_name": "Rajiv Gandhi International (Hyderabad)", "domestic": True, "base_fare": 3800, "duration": 1.8},
+    "visakhapatnam": {"code": "VTZ", "airport_name": "Visakhapatnam International (Vizag)", "domestic": True, "base_fare": 4200, "duration": 2.0},
+    "vizag": {"code": "VTZ", "airport_name": "Visakhapatnam International (Vizag)", "domestic": True, "base_fare": 4200, "duration": 2.0},
+    "bengaluru": {"code": "BLR", "airport_name": "Kempegowda International (Bengaluru)", "domestic": True, "base_fare": 3600, "duration": 1.5},
+    "bangalore": {"code": "BLR", "airport_name": "Kempegowda International (Bengaluru)", "domestic": True, "base_fare": 3600, "duration": 1.5},
+    "mumbai": {"code": "BOM", "airport_name": "Chhatrapati Shivaji Maharaj Intl (Mumbai)", "domestic": True, "base_fare": 3900, "duration": 2.0},
+    "delhi": {"code": "DEL", "airport_name": "Indira Gandhi International (New Delhi)", "domestic": True, "base_fare": 3500, "duration": 1.5},
+    "chennai": {"code": "MAA", "airport_name": "Chennai International Airport", "domestic": True, "base_fare": 3800, "duration": 2.2},
+    "kolkata": {"code": "CCU", "airport_name": "Netaji Subhash Chandra Bose Intl (Kolkata)", "domestic": True, "base_fare": 4100, "duration": 2.1},
+    "pune": {"code": "PNQ", "airport_name": "Pune International Airport", "domestic": True, "base_fare": 3700, "duration": 1.9},
+    "ahmedabad": {"code": "AMD", "airport_name": "Sardar Vallabhbhai Patel Intl", "domestic": True, "base_fare": 3400, "duration": 1.6},
+    
+    # Tourism & Leisure Hotspots
     "goa": {"code": "GOI/GOX", "airport_name": "Goa Dabolim / Mopa Intl", "domestic": True, "base_fare": 4800, "duration": 2.5},
     "manali": {"code": "KUU", "airport_name": "Kullu-Bhuntar Airport (Manali)", "domestic": True, "base_fare": 6800, "duration": 1.5},
-    "paris": {"code": "CDG", "airport_name": "Paris Charles de Gaulle (France)", "domestic": False, "base_fare": 42000, "duration": 9.5},
-    "switzerland": {"code": "ZRH", "airport_name": "Zurich International (Switzerland)", "domestic": False, "base_fare": 46000, "duration": 9.0},
-    "japan": {"code": "HND", "airport_name": "Tokyo Haneda International (Japan)", "domestic": False, "base_fare": 48000, "duration": 9.5},
-    "tokyo": {"code": "HND", "airport_name": "Tokyo Haneda International (Japan)", "domestic": False, "base_fare": 48000, "duration": 9.5},
-    "bali": {"code": "DPS", "airport_name": "Ngurah Rai Bali Intl (Indonesia)", "domestic": False, "base_fare": 24000, "duration": 8.0},
-    "dubai": {"code": "DXB", "airport_name": "Dubai International (UAE)", "domestic": False, "base_fare": 19500, "duration": 3.8},
-    "maldives": {"code": "MLE", "airport_name": "Velana International (Male)", "domestic": False, "base_fare": 22000, "duration": 3.2},
     "jaipur": {"code": "JAI", "airport_name": "Jaipur International Airport", "domestic": True, "base_fare": 3200, "duration": 1.0},
     "udaipur": {"code": "UDR", "airport_name": "Maharana Pratap Airport Udaipur", "domestic": True, "base_fare": 4100, "duration": 1.4},
     "kerala": {"code": "COK", "airport_name": "Cochin International Airport", "domestic": True, "base_fare": 5200, "duration": 3.0},
@@ -26,14 +34,25 @@ DESTINATION_AIRPORT_MAP = {
     "kashmir": {"code": "SXR", "airport_name": "Srinagar International Airport", "domestic": True, "base_fare": 5800, "duration": 1.5},
     "srinagar": {"code": "SXR", "airport_name": "Srinagar International Airport", "domestic": True, "base_fare": 5800, "duration": 1.5},
     "rishikesh": {"code": "DED", "airport_name": "Dehradun Jolly Grant Airport", "domestic": True, "base_fare": 3800, "duration": 1.0},
-    "dehradun": {"code": "DED", "airport_name": "Dehradun Jolly Grant Airport", "domestic": True, "base_fare": 3800, "duration": 1.0},
     "ooty": {"code": "CJB", "airport_name": "Coimbatore International Airport", "domestic": True, "base_fare": 4600, "duration": 2.8},
     "coorg": {"code": "MYQ", "airport_name": "Mysuru / Mangaluru Airport", "domestic": True, "base_fare": 4400, "duration": 2.5},
     "hampi": {"code": "VDY", "airport_name": "Jindal Vijayanagar Vidyanagar Airport", "domestic": True, "base_fare": 5100, "duration": 2.0},
     "andaman": {"code": "IXZ", "airport_name": "Port Blair Veer Savarkar Intl", "domestic": True, "base_fare": 8900, "duration": 3.5},
     "agra": {"code": "AGR", "airport_name": "Agra Kheria Airport", "domestic": True, "base_fare": 2900, "duration": 0.8},
     "varanasi": {"code": "VNS", "airport_name": "Lal Bahadur Shastri Intl Airport", "domestic": True, "base_fare": 4200, "duration": 1.4},
-    "amritsar": {"code": "ATQ", "airport_name": "Sri Guru Ram Dass Jee Intl", "domestic": True, "base_fare": 3500, "duration": 1.0}
+    "amritsar": {"code": "ATQ", "airport_name": "Sri Guru Ram Dass Jee Intl", "domestic": True, "base_fare": 3500, "duration": 1.0},
+
+    # International Gateways
+    "paris": {"code": "CDG", "airport_name": "Paris Charles de Gaulle (France)", "domestic": False, "base_fare": 42000, "duration": 9.5},
+    "switzerland": {"code": "ZRH", "airport_name": "Zurich International (Switzerland)", "domestic": False, "base_fare": 46000, "duration": 9.0},
+    "japan": {"code": "HND", "airport_name": "Tokyo Haneda International (Japan)", "domestic": False, "base_fare": 48000, "duration": 9.5},
+    "tokyo": {"code": "HND", "airport_name": "Tokyo Haneda International (Japan)", "domestic": False, "base_fare": 48000, "duration": 9.5},
+    "bali": {"code": "DPS", "airport_name": "Ngurah Rai Bali Intl (Indonesia)", "domestic": False, "base_fare": 24000, "duration": 8.0},
+    "dubai": {"code": "DXB", "airport_name": "Dubai International (UAE)", "domestic": False, "base_fare": 19500, "duration": 3.8},
+    "maldives": {"code": "MLE", "airport_name": "Velana International (Male)", "domestic": False, "base_fare": 22000, "duration": 3.2},
+    "singapore": {"code": "SIN", "airport_name": "Singapore Changi Airport", "domestic": False, "base_fare": 21000, "duration": 4.5},
+    "london": {"code": "LHR", "airport_name": "London Heathrow International (UK)", "domestic": False, "base_fare": 44000, "duration": 9.0},
+    "rome": {"code": "FCO", "airport_name": "Rome Fiumicino Leonardo da Vinci", "domestic": False, "base_fare": 41000, "duration": 8.5}
 }
 
 AIRLINES_CATALOG = {
@@ -59,14 +78,16 @@ class FlightMLService:
         self._load_models()
 
     def _load_models(self):
-        if os.path.exists(PRICE_MODEL_PATH):
+        p_path = resolve_path(PRICE_MODEL_PATH)
+        if os.path.exists(p_path):
             try:
-                self.price_model = joblib.load(PRICE_MODEL_PATH)
+                self.price_model = joblib.load(p_path)
             except Exception as e:
                 print(f"Error loading flight price model: {e}")
-        if os.path.exists(DELAY_MODEL_PATH):
+        d_path = resolve_path(DELAY_MODEL_PATH)
+        if os.path.exists(d_path):
             try:
-                self.delay_model = joblib.load(DELAY_MODEL_PATH)
+                self.delay_model = joblib.load(d_path)
             except Exception as e:
                 print(f"Error loading flight delay model: {e}")
 

@@ -58,6 +58,7 @@ export interface DestinationCard {
   name: string;
   country: string;
   region: string;
+  category?: string;
   image_url: string;
   rating: number;
   avg_cost_inr: string;
@@ -77,10 +78,13 @@ export interface Hotel {
   total_reviews?: number;
   amenities: string;
   address?: string;
+  location?: string;
   lat?: number;
   lon?: number;
   image_url: string;
   ai_recommendation_score: number;
+  sentiment_score?: number;
+  review_summary?: string;
   sentiment_summary?: {
     sentiment: string;
     confidence: number;
@@ -109,6 +113,7 @@ export interface FlightItem {
   delay_risk: string;
   delay_probability_pct: number;
   recommended_badge: string;
+  recommendation?: string;
   is_live_api: boolean;
 }
 
@@ -122,6 +127,7 @@ export interface Expense {
 }
 
 export interface DisruptionAlert {
+  id?: number | string;
   event_id?: string;
   disruption_id?: string;
   flight_number?: string;
@@ -132,11 +138,35 @@ export interface DisruptionAlert {
   title?: string;
   description?: string;
   scheduled_departure?: string;
-  status: string;
-  severity: string;
+  status?: string;
+  severity?: string;
   delay_reason?: string;
-  impact: string;
+  impact?: string;
+  affected_service?: string;
+  proposed_resolution?: string;
   rebooking_action?: string;
+  timestamp?: string;
+}
+
+export interface WeatherDayForecast {
+  day_name: string;
+  temp_max_c: number;
+  temp_min_c: number;
+  condition: string;
+}
+
+export interface WeatherForecast {
+  destination: string;
+  condition: string;
+  date: string;
+  temperature_c: number;
+  feels_like_c: number;
+  humidity_percent: number;
+  wind_speed_kmh: number;
+  rain_probability_percent: number;
+  daily_forecast: WeatherDayForecast[];
+  packing_tips: string[];
+  indoor_alternatives: string[];
 }
 
 export interface ChatMessage {

@@ -31,4 +31,7 @@ class RouteOptimizer:
 
         return ordered
 
+    def optimize_day_route(self, activities: list):
+        return self.optimize_daily_sequence(activities)
+
 route_optimizer = RouteOptimizer()

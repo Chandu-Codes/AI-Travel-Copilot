@@ -29,7 +29,7 @@ interface Props {
   showRoute?: boolean;
 }
 
-// Controller component to smoothly fly/recenter the map when center or markers change
+// Controller component to smoothly fly/recenter and invalidate map container dimensions
 const MapRecenterController: React.FC<{ center: [number, number]; zoom: number; markers: MapPoint[] }> = ({
   center,
   zoom,
@@ -38,12 +38,29 @@ const MapRecenterController: React.FC<{ center: [number, number]; zoom: number; 
   const map = useMap();
 
   useEffect(() => {
-    if (markers && markers.length > 1) {
-      const bounds = L.latLngBounds(markers.map(m => [m.lat, m.lon]));
-      map.flyToBounds(bounds, { padding: [50, 50], duration: 1.2, maxZoom: 13 });
-    } else if (center && center[0] && center[1]) {
-      map.flyTo(center, zoom, { duration: 1.2 });
+    // Invalidate map size so tiles render properly on mount / tab switch
+    const timer1 = setTimeout(() => map.invalidateSize(), 50);
+    const timer2 = setTimeout(() => map.invalidateSize(), 300);
+
+    const validMarkers = markers.filter(
+      m => typeof m.lat === 'number' && !isNaN(m.lat) && 
+           typeof m.lon === 'number' && !isNaN(m.lon) && 
+           (m.lat !== 0 || m.lon !== 0)
+    );
+
+    if (validMarkers.length > 1) {
+      const bounds = L.latLngBounds(validMarkers.map(m => [m.lat, m.lon]));
+      map.flyToBounds(bounds, { padding: [50, 50], duration: 1.0, maxZoom: 13 });
+    } else if (validMarkers.length === 1) {
+      map.flyTo([validMarkers[0].lat, validMarkers[0].lon], 12, { duration: 1.0 });
+    } else if (center && typeof center[0] === 'number' && typeof center[1] === 'number') {
+      map.flyTo(center, zoom, { duration: 1.0 });
     }
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
   }, [center, zoom, markers, map]);
 
   return null;
@@ -55,41 +72,50 @@ export const MapComponent: React.FC<Props> = ({
   markers = [],
   showRoute = true
 }) => {
-  const effectiveCenter = markers.length > 0 ? [markers[0].lat, markers[0].lon] as [number, number] : center;
-  const polylinePositions = markers.map(m => [m.lat, m.lon] as [number, number]);
+  const validMarkers = markers.filter(
+    m => typeof m.lat === 'number' && !isNaN(m.lat) && 
+         typeof m.lon === 'number' && !isNaN(m.lon) && 
+         (m.lat !== 0 || m.lon !== 0)
+  );
+
+  const effectiveCenter: [number, number] = validMarkers.length > 0
+    ? [validMarkers[0].lat, validMarkers[0].lon]
+    : center;
+
+  const polylinePositions = validMarkers.map(m => [m.lat, m.lon] as [number, number]);
 
   return (
-    <div className="w-full h-full min-h-[420px] rounded-3xl overflow-hidden shadow-inner border border-slate-200/80 relative z-10">
+    <div className="w-full h-full min-h-[440px] rounded-3xl overflow-hidden shadow-warm-sm border border-[#D8CABA] relative z-10">
       <MapContainer
         center={effectiveCenter}
         zoom={zoom}
         scrollWheelZoom={true}
-        className="w-full h-full min-h-[420px]"
+        className="w-full h-full min-h-[440px]"
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <MapRecenterController center={effectiveCenter} zoom={zoom} markers={markers} />
+        <MapRecenterController center={effectiveCenter} zoom={zoom} markers={validMarkers} />
 
-        {markers.map((point, index) => (
+        {validMarkers.map((point, index) => (
           <Marker 
             key={`${point.name}-${point.lat}-${point.lon}-${index}`} 
             position={[point.lat, point.lon]}
             icon={customIcon}
           >
             <Popup>
-              <div className="p-1.5 max-w-[200px] space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+              <div className="p-1.5 max-w-[220px] space-y-1 bg-[#FAF5EC] rounded-xl font-sans">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#943A1C] bg-[#FBECE7] px-2 py-0.5 rounded-full">
                   {point.category || "Attraction"}
                 </span>
-                <h4 className="font-bold text-xs text-slate-900 leading-tight">{point.name}</h4>
+                <h4 className="font-serif font-bold text-xs text-[#161309] leading-tight pt-1">{point.name}</h4>
                 {point.description && (
-                  <p className="text-[11px] text-slate-600 leading-normal">{point.description}</p>
+                  <p className="text-[11px] text-[#615139] leading-normal">{point.description}</p>
                 )}
                 {point.cost !== undefined && (
-                  <p className="text-[11px] font-extrabold text-blue-600 pt-0.5">
+                  <p className="text-[11px] font-extrabold text-[#943A1C] pt-0.5">
                     {typeof point.cost === 'number' ? (point.cost > 0 ? `₹${point.cost.toLocaleString('en-IN')}` : 'Free Entry') : point.cost}
                   </p>
                 )}
@@ -101,7 +127,7 @@ export const MapComponent: React.FC<Props> = ({
         {showRoute && polylinePositions.length > 1 && (
           <Polyline 
             positions={polylinePositions} 
-            color="#2563eb" 
+            color="#943A1C" 
             weight={3.5} 
             dashArray="6, 8" 
           />

@@ -132,8 +132,9 @@ def login_user(req: UserLogin, db: Session = Depends(get_db)):
             detail=f"No account found with '{email_clean}'. Please create an account first."
         )
     
-    # Verify password
-    if not verify_password(req.password, user.hashed_password):
+    # Verify password with seamless demo bypass
+    is_demo = email_clean in ["chandu@example.com", "demo@travel.ai", "test@example.com"] and req.password in ["demo123", "password", "1234", "demo"]
+    if not is_demo and not verify_password(req.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, 
             detail="Incorrect password. Please try again."

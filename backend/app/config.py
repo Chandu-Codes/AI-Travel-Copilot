@@ -18,11 +18,14 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list = ["*"]
     
     # Optional APIs
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", os.getenv("GOOGLE_API_KEY", ""))
     OPENWEATHER_API_KEY: str = os.getenv("OPENWEATHER_API_KEY", "")
     AMADEUS_CLIENT_ID: str = os.getenv("AMADEUS_CLIENT_ID", "")
     AMADEUS_CLIENT_SECRET: str = os.getenv("AMADEUS_CLIENT_SECRET", "")
 
     class Config:
         case_sensitive = True
+        env_file = ".env"
+        extra = "ignore"
 
 settings = Settings()

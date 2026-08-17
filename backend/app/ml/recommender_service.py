@@ -3,6 +3,7 @@ import joblib
 import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from ..utils.path_helper import resolve_path
 
 RECOMMENDER_PATH = "models/recommender_bundle.joblib"
 
@@ -12,13 +13,17 @@ class HybridRecommenderService:
         self._load_bundle()
 
     def _load_bundle(self):
-        if os.path.exists(RECOMMENDER_PATH):
+        resolved = resolve_path(RECOMMENDER_PATH)
+        if os.path.exists(resolved):
             try:
-                self.bundle = joblib.load(RECOMMENDER_PATH)
+                self.bundle = joblib.load(resolved)
             except Exception as e:
-                print(f"Error loading recommender bundle: {e}")
+                print(f"Error loading recommender bundle from {resolved}: {e}")
 
     def recommend(self, query="Goa beaches nightlife", preferred_city=None, top_k=6):
+        if not self.bundle:
+            self._load_bundle()
+
         if not self.bundle:
             return []
             

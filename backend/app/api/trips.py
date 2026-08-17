@@ -1,20 +1,31 @@
-from fastapi import APIRouter, Depends, HTTPException
+import datetime
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from ..database import get_db
 from ..models.entities import Trip, ItineraryDay, Activity, User
 from ..schemas.all_schemas import TripCreateRequest, TripResponse
-from ..agents.planner_agent import planner_agent
+from ..agents.planner_agent import planner_agent, resolve_clean_destination
 
 router = APIRouter(prefix="/trips", tags=["Trips & Itineraries"])
 
 @router.post("/plan", response_model=TripResponse)
 def generate_and_save_trip(req: TripCreateRequest, db: Session = Depends(get_db)):
+    clean_dest = resolve_clean_destination(req.destination)
+    
+    # Calculate duration
+    try:
+        start_d = datetime.datetime.strptime(req.start_date, "%Y-%m-%d")
+        end_d = datetime.datetime.strptime(req.end_date, "%Y-%m-%d")
+        duration = max(1, (end_d - start_d).days + 1)
+    except:
+        duration = 5
+
     # 1. Call Planner Agent
     itinerary_data = planner_agent.generate_itinerary(
-        destination=req.destination,
-        duration_days=(len(req.start_date) > 0 and 5) or 5,
+        destination=clean_dest,
+        duration_days=duration,
         start_date=req.start_date,
         budget_inr=req.budget_inr,
         travelers_count=req.travelers_count,
@@ -29,19 +40,19 @@ def generate_and_save_trip(req: TripCreateRequest, db: Session = Depends(get_db)
     # 3. Save Trip in Database
     new_trip = Trip(
         user_id=user_id,
-        title=itinerary_data["title"],
-        destination=itinerary_data["destination"],
-        country=itinerary_data["country"],
-        start_date=itinerary_data["start_date"],
-        end_date=itinerary_data["end_date"],
-        duration_days=itinerary_data["duration_days"],
-        travelers_count=itinerary_data["travelers_count"],
-        travelers_label=itinerary_data["travelers_label"],
-        total_budget_inr=itinerary_data["total_budget_inr"],
-        estimated_cost_inr=itinerary_data["estimated_cost_inr"],
-        travel_style=itinerary_data["travel_style"],
-        interests=itinerary_data["interests"],
-        image_url=itinerary_data["image_url"],
+        title=itinerary_data.get("title", f"Trip to {clean_dest}"),
+        destination=itinerary_data.get("destination", clean_dest),
+        country=itinerary_data.get("country", clean_dest),
+        start_date=itinerary_data.get("start_date", req.start_date),
+        end_date=itinerary_data.get("end_date", req.end_date),
+        duration_days=itinerary_data.get("duration_days", duration),
+        travelers_count=itinerary_data.get("travelers_count", req.travelers_count),
+        travelers_label=itinerary_data.get("travelers_label", f"{req.travelers_count} Travelers"),
+        total_budget_inr=itinerary_data.get("total_budget_inr", req.budget_inr),
+        estimated_cost_inr=itinerary_data.get("estimated_cost_inr", req.budget_inr),
+        travel_style=itinerary_data.get("travel_style", req.travel_style),
+        interests=itinerary_data.get("interests", req.interests),
+        image_url=itinerary_data.get("image_url", ""),
         status="upcoming"
     )
     db.add(new_trip)
@@ -87,31 +98,56 @@ def generate_and_save_trip(req: TripCreateRequest, db: Session = Depends(get_db)
 @router.get("", response_model=List[TripResponse])
 def get_all_trips(db: Session = Depends(get_db)):
     trips = db.query(Trip).order_by(Trip.created_at.desc()).all()
-    # If DB is empty on first boot, initialize with the Greek Island Adventure demo trip
     if not trips:
         demo_req = TripCreateRequest(
-            destination="Santorini",
-            start_date="2025-06-14",
-            end_date="2025-06-21",
+            destination="Goa",
+            start_date="2025-06-10",
+            end_date="2025-06-15",
             travelers_count=2,
             travelers_label="2 Adults",
-            budget_inr=180000.0,
+            budget_inr=35000.0,
             travel_style="Balanced",
-            interests=["Beaches", "Food", "Photography", "Sightseeing"]
+            interests=["Beaches", "Heritage", "Sightseeing", "Food"]
         )
         demo_trip = generate_and_save_trip(demo_req, db)
-        demo_trip.title = "Greek Island Adventure"
-        demo_trip.image_url = "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=1200&q=80"
-        db.commit()
-        db.refresh(demo_trip)
         return [demo_trip]
     return trips
 
 @router.get("/{trip_id}", response_model=TripResponse)
-def get_trip_by_id(trip_id: int, db: Session = Depends(get_db)):
+def get_trip_by_id(trip_id: int, dest: Optional[str] = Query(None), db: Session = Depends(get_db)):
+    if dest:
+        clean_dest = resolve_clean_destination(dest)
+        existing = db.query(Trip).filter(Trip.destination.ilike(f"%{clean_dest}%")).order_by(Trip.created_at.desc()).first()
+        if existing:
+            return existing
+        
+        # Auto-generate fresh itinerary for this destination
+        new_req = TripCreateRequest(
+            destination=clean_dest,
+            start_date="2025-06-10",
+            end_date="2025-06-15",
+            travelers_count=2,
+            travelers_label="2 Adults",
+            budget_inr=35000.0,
+            travel_style="Balanced",
+            interests=["Beaches", "Heritage", "Sightseeing", "Food"]
+        )
+        return generate_and_save_trip(new_req, db)
+
     trip = db.query(Trip).filter(Trip.id == trip_id).first()
     if not trip:
-        raise HTTPException(status_code=404, detail="Trip not found")
+        # Fallback to create demo trip
+        demo_req = TripCreateRequest(
+            destination="Goa",
+            start_date="2025-06-10",
+            end_date="2025-06-15",
+            travelers_count=2,
+            travelers_label="2 Adults",
+            budget_inr=35000.0,
+            travel_style="Balanced",
+            interests=["Beaches", "Heritage", "Sightseeing", "Food"]
+        )
+        return generate_and_save_trip(demo_req, db)
     return trip
 
 @router.delete("/{trip_id}")

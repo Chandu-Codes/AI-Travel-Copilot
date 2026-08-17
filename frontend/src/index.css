@@ -6,32 +6,46 @@
 
 @layer base {
   body {
-    @apply bg-[#f8fafc] text-slate-900 antialiased font-sans;
+    @apply bg-[#F5EFE6] text-[#0C0A09] antialiased font-sans;
+    background-color: #F5EFE6;
+    color: #0C0A09;
+  }
+
+  h1, h2, h3, h4, .font-serif-display {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: #0C0A09;
   }
 }
 
-/* Custom modern scrollbar */
+/* Custom warm scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #F5EFE6;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #DDCFBD;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #9E3816;
 }
 
-/* Glassmorphism utility */
-.glass-card {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+/* Warm Frosted Glass utility */
+.warm-glass {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(221, 207, 189, 0.8);
+}
+
+.warm-card {
+  background-color: #FFFFFF;
+  border: 1px solid #DDCFBD;
+  border-radius: 1.5rem;
 }

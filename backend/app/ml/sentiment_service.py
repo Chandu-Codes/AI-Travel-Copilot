@@ -1,5 +1,6 @@
 import os
 import joblib
+from ..utils.path_helper import resolve_path
 
 SENTIMENT_MODEL_PATH = "models/hotel_sentiment_model.joblib"
 
@@ -9,13 +10,17 @@ class HotelSentimentService:
         self._load_model()
 
     def _load_model(self):
-        if os.path.exists(SENTIMENT_MODEL_PATH):
+        resolved = resolve_path(SENTIMENT_MODEL_PATH)
+        if os.path.exists(resolved):
             try:
-                self.model = joblib.load(SENTIMENT_MODEL_PATH)
+                self.model = joblib.load(resolved)
             except Exception as e:
-                print(f"Error loading sentiment model: {e}")
+                print(f"Error loading sentiment model from {resolved}: {e}")
 
     def analyze_text(self, text: str):
+        if not self.model:
+            self._load_model()
+
         sentiment = "Positive"
         confidence = 0.88
         if self.model and text.strip():

@@ -47,7 +47,8 @@ export const travelApi = {
 
   // Trips & Itineraries
   getTrips: () => api.get('/trips'),
-  getTripById: (id: number | string) => api.get(`/trips/${id}`),
+  getTripById: (id: number | string, dest?: string) => 
+    api.get(`/trips/${id}${dest ? `?dest=${encodeURIComponent(dest)}` : ''}`),
   planTrip: (payload: any) => api.post('/trips/plan', payload),
   deleteTrip: (id: number) => api.delete(`/trips/${id}`),
 
@@ -78,8 +79,8 @@ export const travelApi = {
   simulateRebooking: (flightNumber = "6E-204", destination = "Goa") => 
     api.post(`/disruptions/rebook-simulation?flight_number=${encodeURIComponent(flightNumber)}&destination=${encodeURIComponent(destination)}`),
 
-  // Chat Copilot
-  sendMessage: (message: string) => api.post('/chat', { message }),
+  // Chat Copilot (Multilingual)
+  sendMessage: (message: string, language = "en") => api.post('/chat', { message, language }),
 
   // Weather
   getWeather: (destination = "Goa") => api.get(`/weather?destination=${encodeURIComponent(destination)}`),

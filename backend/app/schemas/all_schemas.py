@@ -206,5 +206,6 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str
+    language: Optional[str] = "en"
     session_id: Optional[str] = "default-session"
     context: Optional[Dict[str, Any]] = None

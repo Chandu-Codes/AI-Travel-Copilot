@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  UserCircle2, 
   Save, 
-  Sparkles, 
-  Compass, 
-  DollarSign, 
   ShieldCheck,
-  CheckCircle2,
-  User
+  CheckCircle2
 } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { Navbar } from '../components/Navbar';
@@ -45,7 +40,7 @@ export const ProfilePage: React.FC = () => {
   const userInitial = name ? name.charAt(0).toUpperCase() : 'U';
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc]">
+    <div className="flex min-h-screen bg-[#FAF6F0] text-[#1D1917] font-sans">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -54,17 +49,17 @@ export const ProfilePage: React.FC = () => {
           subtitle="Customize AI planner behavior, currency preferences, and personal style" 
         />
 
-        <main className="p-8 max-w-4xl mx-auto w-full space-y-6">
-          <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-6">
+        <main className="p-6 sm:p-8 max-w-4xl mx-auto w-full space-y-6">
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#E8DFD3] shadow-warm space-y-6">
             <div className="flex items-center gap-5">
               {/* Clean Professional Monogram Avatar */}
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-extrabold text-2xl flex items-center justify-center shadow-md">
+              <div className="w-16 h-16 rounded-2xl bg-[#A23B19] text-white font-serif font-bold text-2xl flex items-center justify-center shadow-warm-sm">
                 {userInitial}
               </div>
               <div>
-                <h3 className="text-xl font-bold text-slate-900">{name}</h3>
-                <p className="text-xs text-slate-500 font-medium">{email} • Verified Account</p>
-                <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-bold mt-1">
+                <h3 className="font-serif text-xl font-bold text-[#1D1917]">{name}</h3>
+                <p className="text-xs text-[#78716C] font-medium">{email} • Verified Traveler</p>
+                <div className="flex items-center gap-1.5 text-xs text-[#A23B19] font-bold mt-1">
                   <ShieldCheck className="w-4 h-4" />
                   <span>AI Copilot Authenticated Session</span>
                 </div>
@@ -72,69 +67,69 @@ export const ProfilePage: React.FC = () => {
             </div>
 
             {saved && (
-              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <div className="p-3.5 rounded-2xl bg-[#FBECE7] border border-[#E8DFD3] text-[#A23B19] text-xs font-bold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-[#A23B19]" />
                 <span>Travel Preferences Successfully Saved!</span>
               </div>
             )}
 
             <form onSubmit={handleSave} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Full Name</label>
+                <label className="block font-bold text-[#78716C] uppercase mb-1">Full Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                  className="w-full px-4 py-2.5 rounded-2xl border border-[#E8DFD3] bg-[#F8F3EC] text-[#1D1917] font-semibold outline-none focus:border-[#A23B19]"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Email Address</label>
+                <label className="block font-bold text-[#78716C] uppercase mb-1">Email Address (Read Only)</label>
                 <input
                   type="email"
                   disabled
                   value={email}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 font-medium cursor-not-allowed"
+                  className="w-full px-4 py-2.5 rounded-2xl border border-[#E8DFD3] bg-[#F8F3EC]/50 text-[#A8A29E] font-medium outline-none cursor-not-allowed"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Primary Travel Style</label>
+                  <label className="block font-bold text-[#78716C] uppercase mb-1">Default Travel Persona</label>
                   <select
                     value={travelStyle}
                     onChange={(e) => setTravelStyle(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                    className="w-full px-4 py-2.5 rounded-2xl border border-[#E8DFD3] bg-[#F8F3EC] text-[#1D1917] font-semibold outline-none focus:border-[#A23B19]"
                   >
-                    <option value="Balanced">Balanced (Mix of Sights & Rest)</option>
-                    <option value="Relaxed">Relaxed (Leisure / Slow Travel)</option>
-                    <option value="Packed">Packed (High-Energy Itinerary)</option>
-                    <option value="Luxury">Luxury (5-Star Heritage & Resorts)</option>
+                    <option value="Balanced">Balanced (Sights & Relaxation)</option>
+                    <option value="Relaxed">Relaxed (Slow Leisure)</option>
+                    <option value="Packed">Packed (High-Energy Sightseeing)</option>
+                    <option value="Luxury">Luxury (5-Star & Fine Dining)</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Preferred Currency</label>
+                  <label className="block font-bold text-[#78716C] uppercase mb-1">Preferred Currency</label>
                   <select
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                    className="w-full px-4 py-2.5 rounded-2xl border border-[#E8DFD3] bg-[#F8F3EC] text-[#1D1917] font-semibold outline-none focus:border-[#A23B19]"
                   >
-                    <option value="INR">₹ INR (Indian Rupee)</option>
-                    <option value="USD">$ USD (US Dollar)</option>
-                    <option value="EUR">€ EUR (Euro)</option>
-                    <option value="AED">AED (UAE Dirham)</option>
+                    <option value="INR">INR (₹ - Indian Rupee)</option>
+                    <option value="USD">USD ($ - US Dollar)</option>
+                    <option value="EUR">EUR (€ - Euro)</option>
+                    <option value="GBP">GBP (£ - British Pound)</option>
                   </select>
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="py-3 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-sm transition flex items-center gap-2"
+                className="px-6 py-3 rounded-full bg-[#A23B19] hover:bg-[#892F11] text-white font-bold text-xs shadow-warm-sm transition flex items-center gap-2 mt-2"
               >
                 <Save className="w-4 h-4" />
-                <span>Save Preferences</span>
+                <span>Save Persona Settings</span>
               </button>
             </form>
           </div>

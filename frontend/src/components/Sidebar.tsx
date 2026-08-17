@@ -10,12 +10,10 @@ import {
   CloudSun, 
   Wallet, 
   UserCircle2, 
-  Settings, 
-  LogOut,
-  Plane,
-  AlertTriangle,
-  LogIn,
-  User
+  LogOut, 
+  Plane, 
+  AlertTriangle, 
+  LogIn 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -25,12 +23,12 @@ export const Sidebar: React.FC = () => {
 
   const navItems = [
     { name: 'Home', path: '/dashboard', icon: Home },
-    { name: 'Plan Trip', path: '/plan-trip', icon: Compass },
-    { name: 'Itinerary', path: '/itinerary/1', icon: CalendarDays },
-    { name: 'Bookings', path: '/hotels', icon: Building2 },
+    { name: 'AI Copilot', path: '/assistant', icon: Bot },
+    { name: 'Trips', path: '/plan-trip', icon: Compass },
     { name: 'Flights', path: '/flights', icon: Plane },
-    { name: 'Explore', path: '/explore', icon: Globe2 },
-    { name: 'AI Assistant', path: '/assistant', icon: Bot },
+    { name: 'Hotels', path: '/hotels', icon: Building2 },
+    { name: 'Destinations', path: '/explore', icon: Globe2 },
+    { name: 'Itinerary', path: '/itinerary/1', icon: CalendarDays },
     { name: 'Disruptions', path: '/disruptions', icon: AlertTriangle },
     { name: 'Weather', path: '/weather', icon: CloudSun },
     { name: 'Budget', path: '/budget', icon: Wallet },
@@ -45,23 +43,20 @@ export const Sidebar: React.FC = () => {
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 min-h-screen flex flex-col justify-between py-6 px-4 shrink-0 shadow-xs">
+    <aside className="w-64 bg-[#F5EFE6] border-r border-[#DDCFBD] min-h-screen flex flex-col justify-between py-6 px-4 shrink-0 font-sans">
       <div>
-        {/* Brand Logo - Clean Professional Identity */}
+        {/* Brand Logo with Pure Airplane Icon */}
         <div 
           onClick={() => navigate('/')}
           className="flex items-center gap-3 px-3 mb-8 cursor-pointer group"
         >
-          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm group-hover:bg-blue-700 transition">
-            <Plane className="w-5 h-5 -rotate-45" />
+          <div className="w-9 h-9 rounded-full bg-[#9E3816] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition">
+            <Plane className="w-5 h-5 -rotate-45 text-white" />
           </div>
-          <div>
-            <h1 className="font-bold text-lg text-slate-900 leading-tight tracking-tight">Travel AI</h1>
-            <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Enterprise Copilot</p>
-          </div>
+          <h1 className="font-extrabold text-lg text-[#0C0A09] tracking-tight">AI Travel Copilot</h1>
         </div>
 
-        {/* Nav Links */}
+        {/* Nav Links with High Contrast Bold Labels */}
         <nav className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -70,10 +65,10 @@ export const Sidebar: React.FC = () => {
                 key={item.name}
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  `flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-bold transition-all ${
                     isActive
-                      ? 'bg-blue-50 text-blue-600 shadow-xs font-semibold'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'bg-[#9E3816] text-white shadow-terracotta'
+                      : 'text-[#292524] hover:bg-[#EAE0D2] hover:text-[#0C0A09]'
                   }`
                 }
               >
@@ -85,39 +80,38 @@ export const Sidebar: React.FC = () => {
         </nav>
       </div>
 
-      {/* Professional Clean User Info & Auth Action */}
-      <div className="pt-4 border-t border-slate-100 space-y-2">
+      {/* User Info & Auth Action */}
+      <div className="pt-4 border-t border-[#DDCFBD]/80 space-y-2">
         {isAuthenticated && user ? (
           <>
             <div 
               onClick={() => navigate('/profile')}
-              className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200/70 cursor-pointer hover:bg-slate-100/80 transition"
+              className="flex items-center gap-3 px-3 py-2 rounded-2xl bg-white border border-[#DDCFBD] cursor-pointer hover:bg-[#FAF6F0] transition shadow-warm-sm"
             >
-              {/* Clean Professional Monogram Badge */}
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[#9E3816] text-white font-bold text-xs flex items-center justify-center shrink-0">
                 {userInitial}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-slate-900 truncate">{user.name}</p>
-                <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
+                <p className="text-xs font-extrabold text-[#0C0A09] truncate">{user.name}</p>
+                <p className="text-[10px] text-[#44403C] font-semibold truncate">{user.travel_style || "Explorer"}</p>
               </div>
             </div>
 
             <button
               onClick={handleLogoutClick}
-              className="flex items-center gap-3 px-3.5 py-2 w-full rounded-xl text-xs font-semibold text-slate-500 hover:text-red-600 hover:bg-red-50 transition"
+              className="flex items-center gap-2 px-3 py-2 w-full rounded-2xl text-xs font-bold text-[#44403C] hover:text-[#9E3816] hover:bg-[#FDECE4] transition"
             >
-              <LogOut className="w-4 h-4 text-slate-400" />
+              <LogOut className="w-3.5 h-3.5" />
               <span>Sign Out</span>
             </button>
           </>
         ) : (
           <button
             onClick={() => navigate('/login')}
-            className="flex items-center justify-center gap-2 px-3.5 py-2.5 w-full rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 w-full rounded-full text-xs font-bold bg-[#9E3816] hover:bg-[#832C0E] text-white shadow-warm-sm transition"
           >
-            <LogIn className="w-4 h-4" />
-            <span>Sign In / Register</span>
+            <LogIn className="w-3.5 h-3.5" />
+            <span>Sign In</span>
           </button>
         )}
       </div>

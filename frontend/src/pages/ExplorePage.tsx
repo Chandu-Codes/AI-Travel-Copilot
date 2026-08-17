@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Globe2, Compass, Sparkles, MapPin, SlidersHorizontal } from 'lucide-react';
+import { 
+  Search, 
+  Compass, 
+  MapPin, 
+  Star, 
+  SlidersHorizontal,
+  Sparkles,
+  ChevronRight
+} from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { Navbar } from '../components/Navbar';
 import { DestinationCard } from '../components/DestinationCard';
@@ -8,93 +16,86 @@ import { DestinationCard as IDestinationCard } from '../types';
 
 export const ExplorePage: React.FC = () => {
   const [destinations, setDestinations] = useState<IDestinationCard[]>([]);
-  const [selectedRegion, setSelectedRegion] = useState('All');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [selectedRegion, setSelectedRegion] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const regions = ['All', 'India', 'Europe', 'Asia', 'Middle East', 'Americas'];
-  const categories = ['All', 'Beaches', 'Alps', 'Culture', 'Temples', 'Luxury', 'Adventure', 'Food'];
+  const regions = ['All', 'India - North', 'India - South', 'India - West', 'Europe', 'Southeast Asia', 'Middle East'];
+  const categories = ['All', 'Beaches', 'Mountains & Snow', 'Heritage & Royal', 'Adventure', 'Nature & Wildlife'];
 
   useEffect(() => {
-    travelApi.getFeaturedDestinations()
+    setLoading(true);
+    const fetchCall = selectedRegion !== 'All' 
+      ? travelApi.getDestinations({ region: selectedRegion }) 
+      : travelApi.getFeaturedDestinations();
+
+    fetchCall
       .then(res => setDestinations(res.data))
-      .catch(err => console.error("Explore error:", err))
+      .catch(err => console.error("Error fetching destinations:", err))
       .finally(() => setLoading(false));
-  }, []);
+  }, [selectedRegion]);
 
   const filtered = destinations.filter(d => {
-    const matchesRegion = selectedRegion === 'All' || (d.region && d.region.toLowerCase() === selectedRegion.toLowerCase()) || (selectedRegion === 'India' && d.country === 'India');
-    const matchesCat = selectedCategory === 'All' || d.tags.some(t => t.toLowerCase().includes(selectedCategory.toLowerCase()));
-    const matchesSearch = !searchQuery || 
-      d.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      d.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesRegion && matchesCat && matchesSearch;
+    const matchesSearch = d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          d.country.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'All' || (d.category && d.category === selectedCategory) || (d.tags && d.tags.includes(selectedCategory));
+    return matchesSearch && matchesCategory;
   });
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc]">
+    <div className="flex min-h-screen bg-[#FAF6F0] text-[#1D1917] font-sans">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar 
-          title="Explore Global & Indian Destinations 🌍" 
-          subtitle="Discover world-famous wonders, serene islands, alpine peaks, and cultural heritage" 
+          title="Explore Global Destinations 🌍" 
+          subtitle="Curated Travel Escapes with Hybrid Content-Persona Matching" 
         />
 
-        <main className="p-8 max-w-7xl w-full space-y-6">
-          {/* Header Bar with Region Tabs */}
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-2">
-              <Globe2 className="w-5 h-5 text-blue-600" />
-              <h3 className="font-bold text-slate-900 text-lg">Top Global Hotspots</h3>
-              <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold">
-                {filtered.length} Destinations
-              </span>
-            </div>
-
-            {/* Region Selector Pills */}
-            <div className="flex items-center gap-1.5 bg-slate-200/60 p-1 rounded-2xl">
-              {regions.map((reg) => (
-                <button
-                  key={reg}
-                  onClick={() => setSelectedRegion(reg)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${
-                    selectedRegion === reg
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  {reg}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Filter & Search Bar */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white p-4 rounded-3xl border border-slate-200/80 shadow-xs">
-            <div className="relative w-full sm:w-80">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+        <main className="p-6 sm:p-8 max-w-7xl w-full space-y-6">
+          {/* Search & Region Filter Bar */}
+          <div className="bg-white p-5 rounded-3xl border border-[#E8DFD3] shadow-warm space-y-4">
+            <div className="relative">
+              <Search className="w-4 h-4 text-[#A23B19] absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search country, city, sights (e.g. Japan, Eiffel, Goa)..."
-                className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium focus:outline-none focus:border-blue-500"
+                placeholder="Search by destination name, country, scenery..."
+                className="w-full pl-11 pr-4 py-2.5 rounded-full border border-[#E8DFD3] bg-[#F8F3EC] text-xs sm:text-sm font-medium text-[#1D1917] outline-none focus:border-[#A23B19]"
               />
             </div>
 
-            {/* Category Pills */}
-            <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+            {/* Region Selector Pills */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              <span className="text-[11px] font-bold text-[#78716C] uppercase tracking-wider shrink-0">Region:</span>
+              {regions.map((region) => (
+                <button
+                  key={region}
+                  onClick={() => setSelectedRegion(region)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition ${
+                    selectedRegion === region
+                      ? 'bg-[#A23B19] text-white shadow-warm-sm'
+                      : 'bg-[#F8F3EC] text-[#78716C] hover:bg-[#EFE8DE]'
+                  }`}
+                >
+                  {region}
+                </button>
+              ))}
+            </div>
+
+            {/* Category Tags */}
+            <div className="flex items-center gap-1.5 overflow-x-auto">
+              <span className="text-[11px] font-bold text-[#78716C] uppercase tracking-wider shrink-0">Type:</span>
               {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition ${
+                  className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 transition ${
                     selectedCategory === cat
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'bg-white border border-[#A23B19] text-[#A23B19] font-bold shadow-xs'
+                      : 'bg-white border border-[#E8DFD3] text-[#78716C] hover:border-[#A23B19]'
                   }`}
                 >
                   {cat}
@@ -104,11 +105,21 @@ export const ExplorePage: React.FC = () => {
           </div>
 
           {/* Destinations Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {filtered.map((dest) => (
-              <DestinationCard key={dest.id} destination={dest} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="py-12 text-center text-xs font-semibold text-[#78716C]">
+              Fetching destinations with live real-time tourist popularity indexes...
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="bg-white p-8 rounded-3xl border border-[#E8DFD3] text-center text-xs font-medium text-[#78716C]">
+              No destinations match your search. Try resetting the filters.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {filtered.map((dest) => (
+                <DestinationCard key={dest.id} destination={dest} />
+              ))}
+            </div>
+          )}
         </main>
       </div>
     </div>
