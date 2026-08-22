@@ -1,0 +1,98 @@
+{
+  "generated_at": "2026-08-21 15:31:43",
+  "model_type": "Multinomial Logistic Regression (L-BFGS, multi_class='multinomial')",
+  "train_samples": 12000,
+  "test_samples": 3000,
+  "accuracy": 1.0,
+  "weighted_f1_score": 1.0,
+  "weighted_precision": 1.0,
+  "weighted_recall": 1.0,
+  "training_time_seconds": 0.2038,
+  "inference_time_seconds": 0.015,
+  "classes": [
+    "High",
+    "Low",
+    "Moderate"
+  ],
+  "classification_report": {
+    "High": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 365.0
+    },
+    "Low": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 2193.0
+    },
+    "Moderate": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 442.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 3000.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 3000.0
+    }
+  },
+  "scenario_tests": [
+    {
+      "scenario": "IndiGo Morning Flight in Clear Weather",
+      "multinomial_logistic_prediction": "Low",
+      "multinomial_logistic_probabilities": {
+        "High": 0.0,
+        "Low": 1.0,
+        "Moderate": 0.0
+      },
+      "random_forest_prediction": "Low",
+      "random_forest_probabilities": {
+        "High": 0.0,
+        "Low": 1.0,
+        "Moderate": 0.0
+      }
+    },
+    {
+      "scenario": "SpiceJet Night Flight in Heavy Monsoon",
+      "multinomial_logistic_prediction": "High",
+      "multinomial_logistic_probabilities": {
+        "High": 1.0,
+        "Low": 0.0,
+        "Moderate": 0.0
+      },
+      "random_forest_prediction": "High",
+      "random_forest_probabilities": {
+        "High": 0.994,
+        "Low": 0.0,
+        "Moderate": 0.006
+      }
+    },
+    {
+      "scenario": "Air India Evening Flight with Fog",
+      "multinomial_logistic_prediction": "High",
+      "multinomial_logistic_probabilities": {
+        "High": 0.978,
+        "Low": 0.0,
+        "Moderate": 0.022
+      },
+      "random_forest_prediction": "High",
+      "random_forest_probabilities": {
+        "High": 0.953,
+        "Low": 0.018,
+        "Moderate": 0.029
+      }
+    }
+  ],
+  "file_path": "models/flight_delay_multinomial_logistic.joblib"
+}

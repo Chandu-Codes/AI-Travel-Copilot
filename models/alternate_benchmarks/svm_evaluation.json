@@ -1,0 +1,61 @@
+{
+  "generated_at": "2026-08-21 09:57:13",
+  "dataset": "datasets/flights/flight_prices_india.csv",
+  "train_samples": 32000,
+  "test_samples": 8000,
+  "svm_metrics": {
+    "model_type": "LinearSVR (C=1000.0, max_iter=10000, StandardScaler)",
+    "r2_score": 0.9041,
+    "mae_inr": 4046.51,
+    "rmse_inr": 6966.39,
+    "mape_percentage": 28.72,
+    "training_time_seconds": 0.4325,
+    "inference_time_seconds": 0.0242,
+    "file_path": "models/flight_price_svm_model.joblib"
+  },
+  "all_models_ranking": {
+    "1_random_forest": {
+      "r2": 0.9738,
+      "mae": 1912.04,
+      "rmse": 3640.8
+    },
+    "2_knn": {
+      "r2": 0.9535,
+      "mae": 2538.39,
+      "rmse": 4849.65
+    },
+    "3_svm": {
+      "r2": 0.9041,
+      "mae": 4046.51,
+      "rmse": 6966.39
+    },
+    "4_linear_regression": {
+      "r2": 0.9128,
+      "mae": 4450.87,
+      "rmse": 6641.74
+    }
+  },
+  "sample_case_predictions": [
+    {
+      "scenario": "Last minute Economy flight (1 day left)",
+      "svm_prediction": 3941.04,
+      "knn_prediction": 6074.69,
+      "random_forest_prediction": 6044.92,
+      "linear_regression_prediction": 1020.25
+    },
+    {
+      "scenario": "Advance Economy flight (45 days left)",
+      "svm_prediction": -1050.41,
+      "knn_prediction": 3089.62,
+      "random_forest_prediction": 2446.26,
+      "linear_regression_prediction": -4692.01
+    },
+    {
+      "scenario": "Luxury Business flight (2 days left)",
+      "svm_prediction": 53660.6,
+      "knn_prediction": 39880.55,
+      "random_forest_prediction": 42688.37,
+      "linear_regression_prediction": 49407.82
+    }
+  ]
+}

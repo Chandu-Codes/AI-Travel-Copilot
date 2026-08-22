@@ -7,6 +7,9 @@ import numpy as np
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
 
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(PROJECT_ROOT)
+
 BASE_DIR = "datasets"
 
 print("================================================================")

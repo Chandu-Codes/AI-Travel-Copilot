@@ -6,7 +6,7 @@ import signal
 
 def run():
     print("=" * 65)
-    print("      🚀 Starting AI Travel Copilot Full-Stack Application      ")
+    print("      [AI Travel Copilot] Starting Full-Stack Application      ")
     print("=" * 65)
     print("Backend API will start at:  http://localhost:8000")
     print("Backend API Docs at:        http://localhost:8000/docs")

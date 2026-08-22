@@ -17,6 +17,11 @@ def chat_with_copilot(req: ChatRequest):
     
     # 1. Detect language (Telugu, Hindi, Tamil, Kannada, English, etc.)
     lang = multilingual_engine.detect_language(msg, req.language)
+    
+    # Extract destination if mentioned in user text
+    normalized_dest = multilingual_engine.normalize_destination(msg)
+    parsed = supervisor_agent.parse_user_request(msg)
+    target_destination = normalized_dest if normalized_dest else parsed["destination"]
 
     # 2. Flight disruption check query
     flight_keywords = ["flight", "delay", "status", "cancel", "6e-204", "ఫ్లైట్", "విమానం", "ఆలస్యం", "फ़्लाइट", "फ्लाइट", "देरी", "விமானம்", "தாமதம்", "ವಿಮಾನ", "ವೇಳೆ"]
@@ -27,7 +32,7 @@ def chat_with_copilot(req: ChatRequest):
         gemini_reply = gemini_service.chat_with_gemini(
             user_message=msg,
             language=lang,
-            destination_hint="Goa"
+            destination_hint=target_destination
         )
         
         content_txt = gemini_reply if gemini_reply else multilingual_engine.get_template(
@@ -44,20 +49,15 @@ def chat_with_copilot(req: ChatRequest):
             embedded_data={
                 "flight_number": "6E-204",
                 "delay": "3h 45m",
-                "impact": "Day 1 morning tour and 11:30 AM airport pickup rescheduled",
-                "rebooking_action": "Hotel check-in auto-shifted to 2:00 PM; Fort Aguada tour moved to Day 2 morning.",
+                "impact": f"Day 1 morning tour and 11:30 AM airport pickup rescheduled for {target_destination}",
+                "rebooking_action": "Hotel check-in auto-shifted to 2:00 PM; Day 1 morning sights moved to afternoon.",
                 "cost_inr": 0
             }
         )
 
-    # 3. Trip planning query (e.g. "హైదరాబాద్‌కు 3 రోజుల ట్రిప్", "गोवा के लिए 5 दिन की ट्रिप", "Suggest a 5 day trip to Switzerland")
-    plan_keywords = ["plan", "trip", "suggest", "itinerary", "ప్లాన్", "ట్రిప్", "ప్రయాణం", "రోజుల", "యोजना", "ट्रिप", "दिन", "திட்டம்", "பயணம்", "ಪ್ರವಾಸ", "ಯೋಜನೆ"]
+    # 3. Trip planning query (e.g. "plan for Mumbai", "హైదరాబాద్‌కు 3 రోజుల ట్రిప్", "गोवा के लिए 5 दिन की ट्रिप", "Suggest a 5 day trip to Switzerland")
+    plan_keywords = ["plan", "trip", "suggest", "itinerary", "visit", "explore", "tour", "ప్లాన్", "ట్రిప్", "ప్రయాణం", "రోజుల", "యोजना", "ट्रिप", "दिन", "திட்டம்", "பயணம்", "ಪ್ರವಾಸ", "ಯೋಜನೆ"]
     if any(k in lower_msg for k in plan_keywords) or any(d in lower_msg for d in ["day", "days", "రోజులు", "दिन", "நாட்கள்", "ದಿನಗಳು"]):
-        # Extract vernacular or standard destination name
-        normalized_dest = multilingual_engine.normalize_destination(msg)
-        parsed = supervisor_agent.parse_user_request(msg)
-        target_destination = normalized_dest if normalized_dest else parsed["destination"]
-        
         # Generate authentic itinerary using our rich dataset and planner agent
         itinerary = planner_agent.generate_itinerary(
             destination=target_destination,
@@ -106,7 +106,8 @@ def chat_with_copilot(req: ChatRequest):
     if any(k in lower_msg for k in budget_keywords):
         gemini_reply = gemini_service.chat_with_gemini(
             user_message=msg,
-            language=lang
+            language=lang,
+            destination_hint=target_destination
         )
         tips_txt = gemini_reply if gemini_reply else multilingual_engine.get_template(lang, "budget_tips")
         return ChatMessage(
@@ -123,7 +124,8 @@ def chat_with_copilot(req: ChatRequest):
     # 5. General conversational travel query (e.g. food advice, best season, culture, packing tips)
     gemini_reply = gemini_service.chat_with_gemini(
         user_message=msg,
-        language=lang
+        language=lang,
+        destination_hint=target_destination
     )
     if gemini_reply:
         return ChatMessage(

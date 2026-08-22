@@ -129,25 +129,51 @@ python -m pytest backend/tests/test_api.py -v
 
 ```
 AI-Travel-Copilot/
-├── backend/
+├── backend/                 # FastAPI REST application & AI agent orchestrators
 │   ├── app/
-│   │   ├── agents/          # Multi-Agent orchestrators (Planner, Disruption)
-│   │   ├── api/             # FastAPI REST route endpoints
-│   │   ├── ml/              # Scikit-learn models & TF-IDF vectorizers
-│   │   ├── models/          # SQLAlchemy and Pydantic data schemas
-│   │   ├── optimization/    # Knapsack budget & TSP route solvers
-│   │   └── rag/             # Dense vector knowledge retrieval engine
-│   └── tests/               # Pytest automated test suite
+│   │   ├── agents/          # Multi-Agent orchestrators (PlannerAgent, DisruptionAgent)
+│   │   ├── api/             # REST route endpoints (Trips, Flights, Hotels, Budget, Copilot)
+│   │   ├── ml/              # Model inference services (Sentiment, Flights, Recommender)
+│   │   ├── models/          # SQLAlchemy database ORM models
+│   │   ├── nlp/             # Multilingual NLP translation & intent engines
+│   │   ├── optimization/    # Budget knapsack & route solvers
+│   │   ├── rag/             # Dense vector knowledge retrieval engine
+│   │   └── schemas/         # Pydantic validation schemas
+│   └── tests/               # Pytest API integration tests
+├── models/                  # Serialized Machine Learning models & NLP artifacts
+│   ├── flight_price_model.joblib        # Random Forest Regressor (R² = 0.9738)
+│   ├── flight_delay_model.joblib        # Random Forest Classifier (Acc = 100%)
+│   ├── hotel_sentiment_model.joblib     # TF-IDF + Logistic Regression
+│   ├── recommender_bundle.joblib        # TF-IDF + Cosine Similarity Index
+│   ├── evaluation_report.json           # Master evaluation metrics
+│   └── alternate_benchmarks/            # Baseline models (Linear Reg, KNN, SVM, Naive Bayes)
 ├── datasets/                # Cleaned CSV & JSON destination knowledge bases
-├── frontend/
+│   ├── budgets/             # Budget split matrices & living costs
+│   ├── destinations/        # 150+ POIs, coordinates, attraction knowledge graphs
+│   ├── disruptions/         # Simulated real-world travel advisories
+│   ├── flights/             # 300k Indian flight pricing records
+│   ├── hotels/              # TripAdvisor review NLP corpus & hotel catalogs
+│   ├── geo/                 # Global world cities and coordinates index
+│   └── conversational/      # Multilingual intent classification templates
+├── frontend/                # React 18 + Vite + Tailwind CSS dashboard & copilot UI
 │   ├── src/
-│   │   ├── components/      # Reusable React UI widgets (Navbar, Sidebar, Maps)
-│   │   ├── context/         # AuthContext & Session management
-│   │   ├── pages/           # Landing, Dashboard, Planner, Itinerary, Hotels, Profile
+│   │   ├── components/      # Reusable React widgets (Navbar, Sidebar, Maps, Charts)
+│   │   ├── context/         # AuthContext & Session state management
+│   │   ├── pages/           # Landing, Dashboard, Planner, Flights, Hotels, Budget, Disruptions
 │   │   └── services/        # Axios API client integrations
 │   └── package.json
-├── scripts/                 # Dataset synthesis, ML training & PDF doc generator
-├── requirements.txt         # Python dependencies
+├── scripts/                 # Automation, training, synthesis, and report generators
+│   ├── train_all_models.py              # Master ML training pipeline
+│   ├── validate_and_clean_datasets.py   # Dataset auditing & validation tool
+│   ├── alternate_algorithms/            # Baseline ML training & benchmarking scripts
+│   ├── dataset_builders/                # Knowledge base synthesis & scrapers
+│   └── doc_generators/                  # ReportLab PDF architecture generators
+├── assets/                  # High-resolution UI screenshots and media
+├── Presentation/            # Presentation slide decks (.pptx)
+├── tests/                   # Test suites and uniqueness verification scripts
+├── pytest.ini               # Root test discovery configuration
+├── run_app.py               # Unified concurrent backend & frontend launcher
+├── requirements.txt         # Python backend dependencies
 └── README.md
 ```
 

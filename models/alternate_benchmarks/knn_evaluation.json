@@ -1,0 +1,49 @@
+{
+  "generated_at": "2026-08-21 09:54:41",
+  "dataset": "datasets/flights/flight_prices_india.csv",
+  "train_samples": 32000,
+  "test_samples": 8000,
+  "knn_metrics": {
+    "model_type": "KNeighborsRegressor (k=5, weights=distance, algorithm=auto)",
+    "r2_score": 0.9535,
+    "mae_inr": 2538.39,
+    "rmse_inr": 4849.65,
+    "mape_percentage": 18.41,
+    "training_time_seconds": 0.1118,
+    "inference_time_seconds": 3.1996,
+    "file_path": "models/flight_price_knn_model.joblib"
+  },
+  "comparison_vs_other_models": {
+    "random_forest": {
+      "r2_score": 0.9738,
+      "mae_inr": 1912.04,
+      "rmse_inr": 3640.8,
+      "inference_speed_comparison": "RF is 17.8x faster during inference than KNN"
+    },
+    "linear_regression": {
+      "r2_score": 0.9128,
+      "mae_inr": 4450.87,
+      "rmse_inr": 6641.74
+    }
+  },
+  "sample_case_predictions": [
+    {
+      "scenario": "Last minute Economy flight (1 day left)",
+      "knn_prediction": 6074.69,
+      "linear_regression_prediction": 1020.25,
+      "random_forest_prediction": 6044.92
+    },
+    {
+      "scenario": "Advance Economy flight (45 days left)",
+      "knn_prediction": 3089.62,
+      "linear_regression_prediction": -4692.01,
+      "random_forest_prediction": 2446.26
+    },
+    {
+      "scenario": "Luxury Business flight (2 days left)",
+      "knn_prediction": 39880.55,
+      "linear_regression_prediction": 49407.82,
+      "random_forest_prediction": 42688.37
+    }
+  ]
+}

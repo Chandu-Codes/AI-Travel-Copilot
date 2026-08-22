@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-14 21:51:43",
+  "generated_at": "2026-08-22 09:57:45",
   "models": {
     "flight_price_predictor": {
       "model_type": "RandomForestRegressor (60 trees, max_depth=16)",
@@ -44,8 +44,8 @@
     },
     "hybrid_recommender": {
       "model_type": "Content-Based + Collaborative Hybrid Feature Index",
-      "indexed_pois": 13,
-      "feature_dim": 259,
+      "indexed_pois": 152,
+      "feature_dim": 1899,
       "status": "Indexed & Serialized",
       "file_path": "models/recommender_bundle.joblib"
     }

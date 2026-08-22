@@ -16,20 +16,26 @@ def clean_destination_string(raw: str) -> str:
     prefixes = [
         r"^i\s+want\s+to\s+explore\s+", r"^i\s+want\s+to\s+visit\s+", r"^i\s+want\s+to\s+go\s+to\s+",
         r"^i\s+would\s+like\s+to\s+visit\s+", r"^take\s+me\s+to\s+", r"^show\s+me\s+",
-        r"^let\'?s\s+go\s+to\s+", r"^best\s+of\s+", r"^explore\s+", r"^plan\s+a\s+trip\s+to\s+", 
-        r"^plan\s+trip\s+to\s+", r"^trip\s+to\s+", r"^visit\s+", r"^travel\s+to\s+", 
-        r"^vacation\s+in\s+", r"^holidays\s+in\s+", r"^tour\s+of\s+", r"^tour\s+to\s+", 
-        r"^discover\s+", r"^guide\s+to\s+", r"^go\s+to\s+"
+        r"^let\'?s\s+go\s+to\s+", r"^best\s+of\s+", r"^explore\s+",
+        r"^plan\s+(?:a\s+)?(?:trip|itinerary|vacation|holidays?|tour)?\s*(?:for|to|in|at)\s+",
+        r"^plan\s+(?:for|to|in)\s+", r"^plan\s+",
+        r"^suggest\s+(?:a\s+)?(?:trip|itinerary|plan|vacation)?\s*(?:for|to|in)\s+",
+        r"^suggest\s+",
+        r"^trip\s+(?:for|to|in)\s+", r"^visit\s+", r"^travel\s+(?:to|for|in)\s+", 
+        r"^vacation\s+(?:in|for|to)\s+", r"^holidays?\s+(?:in|for|to)\s+", r"^tour\s+(?:of|to|for|in)\s+", 
+        r"^discover\s+", r"^guide\s+(?:to|for)\s+", r"^go\s+to\s+",
+        r"^places\s+(?:to\s+visit\s+)?in\s+", r"^top\s+(?:sights|attractions|places)\s+in\s+"
     ]
     for pattern in prefixes:
-        text = re.sub(pattern, "", text).strip()
+        text = re.sub(pattern, "", text, flags=re.IGNORECASE).strip()
         
     suffixes = [
         r"\s+tour$", r"\s+trip$", r"\s+vacation$", r"\s+package$", 
-        r"\s+travel$", r"\s+holidays$", r"\s+itinerary$", r"\s+guide$"
+        r"\s+travel$", r"\s+holidays$", r"\s+itinerary$", r"\s+guide$",
+        r"\s+sightseeing$", r"\s+attractions$"
     ]
     for pattern in suffixes:
-        text = re.sub(pattern, "", text).strip()
+        text = re.sub(pattern, "", text, flags=re.IGNORECASE).strip()
         
     return text.strip()
 

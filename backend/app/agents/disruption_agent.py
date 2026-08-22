@@ -1,6 +1,8 @@
 import os
+import re
 import pandas as pd
 from typing import Dict, Any, List, Optional
+from ..utils.path_helper import resolve_path
 
 DISRUPTIONS_CSV = "datasets/disruptions/travel_disruptions.csv"
 
@@ -10,12 +12,13 @@ class DisruptionAgent:
         self._load_disruptions()
 
     def _load_disruptions(self):
-        if os.path.exists(DISRUPTIONS_CSV):
+        resolved = resolve_path(DISRUPTIONS_CSV)
+        if os.path.exists(resolved):
             try:
-                df = pd.read_csv(DISRUPTIONS_CSV)
+                df = pd.read_csv(resolved, dtype=str).fillna("")
                 self.disruptions = df.to_dict(orient="records")
             except Exception as e:
-                print(f"Error loading disruptions: {e}")
+                print(f"Error loading disruptions from {resolved}: {e}")
 
     def get_all_disruptions(self, destination: Optional[str] = None) -> List[Dict[str, Any]]:
         self._load_disruptions()
@@ -49,9 +52,12 @@ class DisruptionAgent:
         return matched
 
     def check_flight(self, flight_number: str) -> Dict[str, Any]:
-        fn_clean = flight_number.strip().upper()
+        self._load_disruptions()
+        fn_clean = re.sub(r'[\s\-]', '', flight_number.strip().upper())
         for d in self.disruptions:
-            if fn_clean in str(d.get("flight_number", "")).upper():
+            row_fn = str(d.get("flight_number", "")).strip().upper()
+            row_fn_clean = re.sub(r'[\s\-]', '', row_fn)
+            if fn_clean and row_fn_clean and (fn_clean == row_fn_clean or fn_clean in row_fn_clean or row_fn_clean in fn_clean):
                 return {
                     "is_disrupted": True,
                     "event": d,
